@@ -10,7 +10,7 @@ import { DatabaseConnector } from './database-connector-builder';
 
 export class MariaDBConnector implements DatabaseConnector {
     private dbConnection: Knex;
-    private triggers: Trigger[] = [];
+    private triggers: MySqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
     private uriComponents: URI.URIComponents;

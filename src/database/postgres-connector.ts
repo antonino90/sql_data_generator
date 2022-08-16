@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import Knex from 'knex';
 import { getLogger } from 'log4js';
-import { Connection, MysqlError } from 'mysql';
+import { Connection, MysqlError } from 'mysql'; // todo manage psql error
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
@@ -10,7 +10,7 @@ import { DatabaseConnector } from './database-connector-builder';
 
 export class PostgresConnector implements DatabaseConnector {
     private dbConnection: Knex;
-    private triggers: Trigger[] = [];
+    private triggers: PostgreSqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
     private uriComponents: URI.URIComponents;
@@ -103,23 +103,23 @@ export class PostgresConnector implements DatabaseConnector {
 
     private async extractColumns(table: Table) {
         this.logger.info(table.name);
-        const columns: MySQLColumn[] = await this.getColumnsInformation(table);
+        const columns: PostgreSQLColumn[] = await this.getColumnsInformation(table);
         columns
-            .filter((column: MySQLColumn) => {
-                return ['enum', 'set'].includes(column.DATA_TYPE || '');
-            }).forEach((column: MySQLColumn) => {
-                column.NUMERIC_PRECISION = column.COLUMN_TYPE.match(/(enum|set)\((.*)\)$/)![1].split('\',\'').length;
+            .filter((column: PostgreSQLColumn) => {
+                return ['enum', 'set'].includes(column.data_type || '');
+            }).forEach((column: PostgreSQLColumn) => {
+                column.numeric_precision = column.column_type.match(/(enum|set)\((.*)\)$/)![1].split('\',\'').length;
             });
 
-        table.columns = columns.map((mysqlColumn: MySQLColumn) => {
+        table.columns = columns.map((postgresqlColumn: PostgreSQLColumn) => {
             const column = new Column();
-            column.name = mysqlColumn.COLUMN_NAME;
-            if (mysqlColumn.COLUMN_KEY && mysqlColumn.COLUMN_KEY.match(/PRI|UNI/ig)) column.unique = true;
-            column.nullable = mysqlColumn.IS_NULLABLE === 'YES' ? 0.1 : 0;
-            column.max = mysqlColumn.CHARACTER_MAXIMUM_LENGTH || mysqlColumn.NUMERIC_PRECISION || 255;
-            if (mysqlColumn.COLUMN_TYPE && mysqlColumn.COLUMN_TYPE.includes('unsigned')) column.unsigned = true;
-            if (mysqlColumn.EXTRA && mysqlColumn.EXTRA.includes('auto_increment')) column.autoIncrement = true;
-            switch (mysqlColumn.DATA_TYPE) {
+            column.name = postgresqlColumn.column_name;
+            if (postgresqlColumn.column_key && postgresqlColumn.column_key.match(/PRI|UNI/ig)) column.unique = true;
+            column.nullable = postgresqlColumn.is_nullable === 'YES' ? 0.1 : 0;
+            column.max = postgresqlColumn.character_maximum_length || postgresqlColumn.numeric_precision || 255;
+            if (postgresqlColumn.column_type && postgresqlColumn.column_type.includes('unsigned')) column.unsigned = true;
+            if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
+            switch (postgresqlColumn.data_type) {
                 case 'bool':
                 case 'boolean':
                     column.generator = Generators.boolean;
@@ -211,11 +211,11 @@ export class PostgresConnector implements DatabaseConnector {
                 case 'bit':
                 case 'set':
                     column.generator = Generators.bit;
-                    column.max = mysqlColumn.NUMERIC_PRECISION;
+                    column.max = postgresqlColumn.numeric_precision;
                     break;
                 case 'enum':
                     column.generator = Generators.integer;
-                    column.max = mysqlColumn.NUMERIC_PRECISION;
+                    column.max = postgresqlColumn.numeric_precision;
                     break;
             }
             return column;
@@ -252,10 +252,10 @@ export class PostgresConnector implements DatabaseConnector {
 
     public async disableTriggers(table: string): Promise<void> {
         const triggers = this.triggers.filter((trigger) => {
-            return trigger.EVENT_OBJECT_SCHEMA === this.database && trigger.EVENT_OBJECT_TABLE === table;
+            return trigger.event_object_schema === this.database && trigger.event_object_table === table;
         });
         const promises = triggers.map((trigger) => {
-            return this.dbConnection.raw(`DROP TRIGGER IF EXISTS ${trigger.TRIGGER_SCHEMA}.${trigger.TRIGGER_NAME};`);
+            return this.dbConnection.raw(`DROP TRIGGER IF EXISTS ${trigger.trigger_schema}.${trigger.trigger_name};`);
         });
         await Promise.all(promises)
             .catch(err => this.logger.error(err.message));
@@ -264,14 +264,14 @@ export class PostgresConnector implements DatabaseConnector {
     public async enableTriggers(table: string): Promise<void> {
         for (let i = 0; i < this.triggers.length; i++) {
             const trigger = this.triggers[i];
-            if (trigger.EVENT_OBJECT_SCHEMA !== this.database || trigger.EVENT_OBJECT_TABLE !== table) continue;
-            await this.dbConnection.raw(`DROP TRIGGER IF EXISTS ${trigger.TRIGGER_SCHEMA}.${trigger.TRIGGER_NAME};`);
+            if (trigger.event_object_schema !== this.database || trigger.event_object_table !== table) continue;
+            await this.dbConnection.raw(`DROP TRIGGER IF EXISTS ${trigger.trigger_schema}.${trigger.trigger_name};`);
             await this.dbConnection.raw(
-                `CREATE DEFINER = ${trigger.DEFINER}
-                TRIGGER ${trigger.TRIGGER_SCHEMA}.${trigger.TRIGGER_NAME} ${trigger.ACTION_TIMING} ${trigger.EVENT_MANIPULATION}
-                ON ${trigger.EVENT_OBJECT_SCHEMA}.${trigger.EVENT_OBJECT_TABLE}
+                `CREATE DEFINER = ${trigger.definer}
+                TRIGGER ${trigger.trigger_schema}.${trigger.trigger_name} ${trigger.action_timing} ${trigger.event_manipulation}
+                ON ${trigger.event_object_schema}.${trigger.event_object_table}
                 FOR EACH ROW
-                ${trigger.ACTION_STATEMENT}`,
+                ${trigger.action_statement}`,
             );
             this.triggers.splice(i, 1);
         }
