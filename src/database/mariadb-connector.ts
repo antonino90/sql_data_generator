@@ -328,6 +328,8 @@ export class MariaDBConnector implements DatabaseConnector {
             .having(this.dbConnection.raw('count(kcu2.CONSTRAINT_NAME) < 2'))
             .as('indexes');
 
+        // todo ajouter un filtre sur la subquery => and `tc`.`CONSTRAINT_SCHEMA` = "this.database"
+
         return this.dbConnection.select([
             'kcu.column_name AS column',
             'kcu.referenced_table_name AS foreignTable',

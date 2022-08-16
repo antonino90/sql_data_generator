@@ -27,6 +27,7 @@ export class PostgresConnector implements DatabaseConnector {
 
         this.dbConnection = Knex({
             client: 'pg',
+            // wrapIdentifier: (value, origImpl, queryContext) => value, to remove the quotes
             connection: this.uri,
             log: {
                 warn: (message) => {
@@ -305,8 +306,6 @@ export class PostgresConnector implements DatabaseConnector {
         const subQuery = this.dbConnection
             .select([
                 'kcu2.table_name',
-                'kcu2.column_name',
-                'kcu2.constraint_schema',
                 this.dbConnection.raw('1 AS unique_index'),
             ])
             .from('information_schema.key_column_usage AS kcu2')
@@ -322,18 +321,56 @@ export class PostgresConnector implements DatabaseConnector {
 
         return this.dbConnection.select([
             'kcu.column_name AS column',
-            'kcu.referenced_table_name AS foreignTable',
-            'kcu.referenced_column_name AS foreignColumn',
-            'unique_index AS uniqueIndex',
+            'k2.table_name AS foreignTable',
+            'k2.column_name AS foreignColumn',
+            'unique_index AS uniqueIndex'
         ])
             .from('information_schema.key_column_usage as kcu')
+            .leftJoin('information_schema.referential_constraints AS fk', function () {
+              this.using(["constraint_schema", "constraint_name"])
+            })
+          .leftJoin('information_schema.key_column_usage AS k2', function () {
+              this.on('k2.constraint_schema', 'fk.unique_constraint_schema')
+                .andOn('k2.constraint_name', 'fk.unique_constraint_name')
+                .andOn('k2.ordinal_position', 'kcu.position_in_unique_constraint')
+          })
             .leftJoin(subQuery, function () {
                 this.on('kcu.table_name', 'indexes.table_name')
-                    .andOn('kcu.column_name', 'indexes.column_name')
-                    .andOn('kcu.constraint_schema', 'indexes.constraint_schema');
             })
             .where('kcu.table_name', table.name)
-            .whereNotNull('kcu.referenced_column_name');
+            .whereNotNull('k2.column_name');
+
+        /**
+         * destination query
+         *
+         * SELECT
+            k1.table_schema,
+            k1.table_name,
+            k1.column_name,
+            k2.table_schema AS referenced_table_schema,
+            k2.table_name AS referenced_table_name,
+            k2.constraint_name AS referenced_constraint_name,
+            k2.column_name AS referenced_column_name
+        FROM information_schema.key_column_usage k1
+            JOIN information_schema.referential_constraints fk USING (constraint_schema, constraint_name)
+            JOIN information_schema.key_column_usage k2
+                ON k2.constraint_schema = fk.unique_constraint_schema
+                AND k2.constraint_name = fk.unique_constraint_name
+                AND k2.ordinal_position = k1.position_in_unique_constraint
+            LEFT JOIN (
+             SELECT
+                k2.table_name,
+                k2.constraint_name
+             FROM information_schema.key_column_usage k2
+                inner join "information_schema"."table_constraints" as "tc" on "tc"."constraint_schema" = "k2"."constraint_schema"
+                    and "tc"."table_name" = "k2"."table_name"
+                    and "tc"."constraint_name" = "k2"."constraint_name"
+                    and "tc"."constraint_type" in ('PRIMARY KEY', 'UNIQUE')
+             GROUP BY k2.table_name, k2.constraint_name
+             having count(k2.constraint_name) < 2
+         ) as indexes on k1.table_name = indexes.table_name
+         WHERE k2.column_name IS NOT NULL AND k1.table_name = 'FsiAgentDelegues';
+         */
     }
 
     async getValuesForForeignKeys(
