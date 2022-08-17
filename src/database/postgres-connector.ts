@@ -293,19 +293,54 @@ export class PostgresConnector implements DatabaseConnector {
         });
     }
 
-    async getColumnsInformation(table: Table) {
-        return this.dbConnection.select()
+    async getColumnsInformation(table: Table): Promise<PostgreSQLColumn[]> {
+        const columnsData = await this.dbConnection.select()
             .from('information_schema.columns')
             .where({
                 'table_schema': this.database,
                 'table_name': table.name,
             });
+
+        const columnsConstraint = await this.getColumnsConstraints(table);
+        if (columnsConstraint.length) {
+            return columnsData.map((column) => {
+                const match = columnsConstraint.find((col) => column.column_name.toLowerCase() === col.column_name.toLowerCase().replace(/"/gi, ''));
+                if (match) {
+                    column.column_key = (match.indisprimary ? 'PRIMARY KEY' : 'UNIQUE');
+                }
+                return column;
+            })
+        }
+
+        return columnsData;
+    }
+
+    private async getColumnsConstraints(table: Table): Promise<ColumnConstraintQueryType[]> {
+        return this.dbConnection
+          .select<ColumnConstraintQueryType[]>([
+              't.relname as table_name',
+              'ix.relname as index_name',
+              this.dbConnection.raw("regexp_replace(pg_get_indexdef(indexrelid), '.*\\((.*)\\)', '\\1') as column_name"),
+              this.dbConnection.raw('indisunique'),
+              this.dbConnection.raw('indisprimary')
+          ])
+          .from('pg_index AS i')
+          .join('pg_class AS t', function () {
+              this.on('t.oid', '=', 'i.indrelid')
+          })
+          .join('pg_class AS ix', function () {
+              this.on('ix.oid', '=', 'i.indexrelid')
+          })
+          .where('t.relname', table.name)
+          .andWhereRaw('(indisunique OR indisprimary)');
     }
 
     async getForeignKeys(table: Table) {
         const subQuery = this.dbConnection
             .select([
                 'kcu2.table_name',
+                this.dbConnection.raw('MAX(kcu2.column_name) as column_name'),
+                this.dbConnection.raw('MAX(kcu2.constraint_schema) as constraint_schema'),
                 this.dbConnection.raw('1 AS unique_index'),
             ])
             .from('information_schema.key_column_usage AS kcu2')
@@ -336,41 +371,11 @@ export class PostgresConnector implements DatabaseConnector {
           })
             .leftJoin(subQuery, function () {
                 this.on('kcu.table_name', 'indexes.table_name')
+                  .andOn('kcu.column_name', 'indexes.column_name')
+                  .andOn('kcu.constraint_schema', 'indexes.constraint_schema');
             })
             .where('kcu.table_name', table.name)
             .whereNotNull('k2.column_name');
-
-        /**
-         * destination query
-         *
-         * SELECT
-            k1.table_schema,
-            k1.table_name,
-            k1.column_name,
-            k2.table_schema AS referenced_table_schema,
-            k2.table_name AS referenced_table_name,
-            k2.constraint_name AS referenced_constraint_name,
-            k2.column_name AS referenced_column_name
-        FROM information_schema.key_column_usage k1
-            JOIN information_schema.referential_constraints fk USING (constraint_schema, constraint_name)
-            JOIN information_schema.key_column_usage k2
-                ON k2.constraint_schema = fk.unique_constraint_schema
-                AND k2.constraint_name = fk.unique_constraint_name
-                AND k2.ordinal_position = k1.position_in_unique_constraint
-            LEFT JOIN (
-             SELECT
-                k2.table_name,
-                k2.constraint_name
-             FROM information_schema.key_column_usage k2
-                inner join "information_schema"."table_constraints" as "tc" on "tc"."constraint_schema" = "k2"."constraint_schema"
-                    and "tc"."table_name" = "k2"."table_name"
-                    and "tc"."constraint_name" = "k2"."constraint_name"
-                    and "tc"."constraint_type" in ('PRIMARY KEY', 'UNIQUE')
-             GROUP BY k2.table_name, k2.constraint_name
-             having count(k2.constraint_name) < 2
-         ) as indexes on k1.table_name = indexes.table_name
-         WHERE k2.column_name IS NOT NULL AND k1.table_name = 'FsiAgentDelegues';
-         */
     }
 
     async getValuesForForeignKeys(

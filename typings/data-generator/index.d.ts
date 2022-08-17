@@ -100,3 +100,11 @@ interface PostgreSqlTrigger {
     collation_connection: string,
     database_collation: string,
 }
+
+interface ColumnConstraintQueryType {
+    table_name: string;
+    index_name: string;
+    column_name: string;
+    indisunique: boolean;
+    indisprimary:boolean
+}

@@ -14,7 +14,7 @@ export interface DatabaseConnector {
     getSchema(): Promise<Schema>;
 
     getTablesInformation(): Promise<Table[]>;
-    getColumnsInformation(table: Table): Promise<MySQLColumn[]>;
+    getColumnsInformation(table: Table): Promise<MySQLColumn[] | PostgreSQLColumn[]>;
     getForeignKeys(table: Table): Promise<ForeignKey[]>;
     getValuesForForeignKeys(
         table: string,
