@@ -73,7 +73,6 @@ export class Column {
     @ValidateNested()
     @IsOptional()
     foreignKey?: ForeignKey;
-    @ValidateNested()
     @IsOptional()
     values?: Values;
     @IsOptional()

@@ -105,10 +105,14 @@ export class PostgresConnector implements DatabaseConnector {
         this.logger.info(table.name);
         const columns: PostgreSQLColumn[] = await this.getColumnsInformation(table);
         columns
-            .filter((column: PostgreSQLColumn) => {
-                return ['enum', 'set'].includes(column.data_type || '');
-            }).forEach((column: PostgreSQLColumn) => {
-                column.numeric_precision = column.column_type.match(/(enum|set)\((.*)\)$/)![1].split('\',\'').length;
+            .filter((column: PostgreSQLColumn) => [
+              'enum',
+              // 'set' // @todo manage equivalent of SET type of sql
+            ].includes(column.data_type || ''))
+            .forEach((column: PostgreSQLColumn) => {
+                if (column.enum_values) {
+                    return column.numeric_precision = (column.enum_values).split(',').length;
+                }
             });
 
         table.columns = columns.map((postgresqlColumn: PostgreSQLColumn) => {
@@ -214,7 +218,8 @@ export class PostgresConnector implements DatabaseConnector {
                     column.max = postgresqlColumn.numeric_precision;
                     break;
                 case 'enum':
-                    column.generator = Generators.integer;
+                    column.generator = Generators.values;
+                    column.values = postgresqlColumn.enum_values?.split(',').map((v) => v.trim());
                     column.max = postgresqlColumn.numeric_precision;
                     break;
             }
@@ -294,7 +299,7 @@ export class PostgresConnector implements DatabaseConnector {
     }
 
     async getColumnsInformation(table: Table): Promise<PostgreSQLColumn[]> {
-        const columnsData = await this.dbConnection.select()
+        let columnsData = await this.dbConnection.select()
             .from('information_schema.columns')
             .where({
                 'table_schema': this.database,
@@ -303,10 +308,22 @@ export class PostgresConnector implements DatabaseConnector {
 
         const columnsConstraint = await this.getColumnsConstraints(table);
         if (columnsConstraint.length) {
-            return columnsData.map((column) => {
+            columnsData = columnsData.map((column) => {
                 const match = columnsConstraint.find((col) => column.column_name.toLowerCase() === col.column_name.toLowerCase().replace(/"/gi, ''));
                 if (match) {
                     column.column_key = (match.indisprimary ? 'PRIMARY KEY' : 'UNIQUE');
+                }
+                return column;
+            })
+        }
+
+        const columnsWithEnumType = await this.getColumnsWithEnumType(table);
+        if (columnsWithEnumType.length) {
+            columnsData = columnsData.map((column) => {
+                const match = columnsWithEnumType.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                if (match) {
+                    column.data_type = 'enum';
+                    column.enum_values = match.enum_values;
                 }
                 return column;
             })
@@ -333,6 +350,31 @@ export class PostgresConnector implements DatabaseConnector {
           })
           .where('t.relname', table.name)
           .andWhereRaw('(indisunique OR indisprimary)');
+    }
+
+    private async getColumnsWithEnumType(table: Table): Promise<ColumnEnumQueryType[]> {
+        return this.dbConnection
+          .select<ColumnEnumQueryType[]>([
+              'col.table_name',
+              'col.column_name',
+              this.dbConnection.raw('string_agg(enu.enumlabel, \', \' order by enu.enumsortorder) as enum_values'),
+          ])
+          .from('information_schema.columns AS col')
+          .join('information_schema.tables AS tab', function () {
+              this.on('tab.table_schema', '=', 'col.table_schema')
+              this.andOn('tab.table_name', '=', 'col.table_name')
+          })
+          .join('pg_type AS typ', function () {
+              this.on('col.udt_name', '=', 'typ.typname')
+          })
+          .join('pg_enum AS enu', function () {
+              this.on('typ.oid', '=', 'enu.enumtypid')
+          })
+          .whereNotIn('col.table_schema', ['information_schema', 'pg_catalog'])
+          .andWhere('col.table_name', table.name)
+          .andWhere('typ.typtype', 'e')
+          .andWhere('tab.table_type', 'BASE TABLE')
+          .groupBy(['col.table_name', 'col.column_name']);
     }
 
     async getForeignKeys(table: Table) {

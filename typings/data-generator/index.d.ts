@@ -49,6 +49,7 @@ interface PostgreSQLColumn {
     privileges: string;
     column_comment: string;
     foreign_values: any[];
+    enum_values?: string;
 }
 
 interface MySqlTrigger {
@@ -107,4 +108,10 @@ interface ColumnConstraintQueryType {
     column_name: string;
     indisunique: boolean;
     indisprimary:boolean
+}
+
+interface ColumnEnumQueryType {
+    table_name: string;
+    column_name: string;
+    enum_values: string[];
 }
