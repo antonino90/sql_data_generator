@@ -13,6 +13,7 @@ import { RealGenerator } from './real.generator';
 import { StringGenerator } from './string.generator';
 import { TimeGenerator } from './time.generator';
 import { ValuesGenerator } from './values.generator';
+import { UuidGenerator } from "./uuid.generator";
 
 
 export class GeneratorBuilder {
@@ -44,6 +45,7 @@ export class GeneratorBuilder {
             case Generators.time:
                 TimeGenerator.validate(table, column);
                 break;
+            case Generators.uuid:
             case Generators.string:
                 StringGenerator.validate(table, column);
                 break;
@@ -91,6 +93,9 @@ export class GeneratorBuilder {
                 break;
             case Generators.string:
                 generator = new StringGenerator(this.random, this.table, column);
+                break;
+            case Generators.uuid:
+                generator = new UuidGenerator(this.random, this.table, column);
                 break;
             case Generators.values:
                 generator = new ValuesGenerator(this.random, this.table, column);

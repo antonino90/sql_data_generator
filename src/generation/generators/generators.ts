@@ -10,6 +10,7 @@ export enum Generators {
     date = 'date',
     time = 'time',
     string = 'string',
+    uuid = 'uuid',
     values = 'values',
     foreignKey = 'foreignKey',
     function = 'function',

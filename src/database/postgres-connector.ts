@@ -144,13 +144,15 @@ export class PostgresConnector implements DatabaseConnector {
                 case 'int':
                 case 'integer':
                 case 'bigint':
+                case 'bigserial':
                     column.generator = Generators.integer;
                     column.min = -2147483648;
                     column.max = 2147483647;
                     break;
+                case 'numeric':
                 case 'decimal':
-                case 'dec':
-                case 'float':
+                case 'float8':
+                case 'double precision':
                 case 'double':
                     column.generator = Generators.real;
                     column.min = -2147483648;
@@ -169,18 +171,15 @@ export class PostgresConnector implements DatabaseConnector {
                 case 'interval':
                     column.generator = Generators.time;
                     break;
-                case 'year':
-                    column.generator = Generators.integer;
-                    column.min = 1901;
-                    column.max = 2155;
-                    break;
                 case 'uuid':
+                    column.generator = Generators.uuid;
+                    break;
+                case 'character':
                 case 'character varying':
                 case 'text':
                     column.generator = Generators.string;
                     break;
                 case 'ARRAY':
-                    column.generator = Generators.string;
                     /**
                      * @todo introduce generator with array of type (int[], varchar(255)[]..)
                      * SELECT column_name, data_type, udt_name::regtype
@@ -189,7 +188,7 @@ export class PostgresConnector implements DatabaseConnector {
                      */
                     break;
                 case 'bit':
-                case 'set':
+                case 'bit varying':
                     column.generator = Generators.bit;
                     column.max = postgresqlColumn.numeric_precision;
                     break;
