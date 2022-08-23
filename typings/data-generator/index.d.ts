@@ -113,5 +113,10 @@ interface ColumnConstraintQueryType {
 interface ColumnEnumQueryType {
     table_name: string;
     column_name: string;
-    enum_values: string[];
+    enum_values: string;
+}
+
+interface ColumnAutoIncrementQueryType {
+    table_name: string;
+    column_name: string;
 }

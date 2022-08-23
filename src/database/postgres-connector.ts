@@ -121,8 +121,7 @@ export class PostgresConnector implements DatabaseConnector {
             if (postgresqlColumn.column_key && postgresqlColumn.column_key.match(/PRI|UNI/ig)) column.unique = true;
             column.nullable = postgresqlColumn.is_nullable === 'YES' ? 0.1 : 0;
             column.max = postgresqlColumn.character_maximum_length || postgresqlColumn.numeric_precision || 255;
-            // @todo gestion auto increment pour postgresql
-            //if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
+            if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
             switch (postgresqlColumn.data_type) {
                 case 'bool':
                 case 'boolean':
@@ -274,7 +273,7 @@ export class PostgresConnector implements DatabaseConnector {
     }
 
     async getColumnsInformation(table: Table): Promise<PostgreSQLColumn[]> {
-        let columnsData = await this.dbConnection.select()
+        let columnsData = await this.dbConnection.select<PostgreSQLColumn[]>()
             .from('information_schema.columns')
             .where({
                 'table_schema': this.database,
@@ -299,6 +298,17 @@ export class PostgresConnector implements DatabaseConnector {
                 if (match) {
                     column.data_type = 'enum';
                     column.enum_values = match.enum_values;
+                }
+                return column;
+            })
+        }
+
+        const columnsWithAutoIncrement = await this.getColumnsWithAutoIncrement(table);
+        if (columnsWithAutoIncrement.length) {
+            columnsData = columnsData.map((column) => {
+                const match = columnsWithAutoIncrement.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                if (match) {
+                    column.extra = 'auto_increment';
                 }
                 return column;
             })
@@ -350,6 +360,19 @@ export class PostgresConnector implements DatabaseConnector {
           .andWhere('typ.typtype', 'e')
           .andWhere('tab.table_type', 'BASE TABLE')
           .groupBy(['col.table_name', 'col.column_name']);
+    }
+
+    private async getColumnsWithAutoIncrement(table: Table): Promise<ColumnAutoIncrementQueryType[]> {
+        return this.dbConnection
+          .select<ColumnAutoIncrementQueryType[]>([
+              'col.table_name',
+              'col.column_name',
+          ])
+          .from('information_schema.columns AS col')
+          .joinRaw("INNER JOIN information_schema.sequences AS seq ON seq.sequence_name = REGEXP_REPLACE(substring(pg_get_serial_sequence(concat('\"', table_name, '\"'), column_name), 8), '\"', '', 'g')")
+          .where('col.table_schema', this.database)
+          .andWhere('col.table_name', table.name)
+          .andWhere('seq.increment', '1');
     }
 
     async getForeignKeys(table: Table) {
