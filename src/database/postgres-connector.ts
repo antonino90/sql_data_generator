@@ -5,7 +5,7 @@ import { Connection, MysqlError } from 'mysql'; // todo manage psql error
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
-import { Column, Schema, Table } from '../schema/schema.class';
+import { MariaDbColumn, PostgresColumn, Schema, Table } from '../schema/schema.class';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class PostgresConnector implements DatabaseConnector {
@@ -116,13 +116,13 @@ export class PostgresConnector implements DatabaseConnector {
             });
 
         table.columns = columns.map((postgresqlColumn: PostgreSQLColumn) => {
-            const column = new Column();
+            const column = new PostgresColumn();
             column.name = postgresqlColumn.column_name;
             if (postgresqlColumn.column_key && postgresqlColumn.column_key.match(/PRI|UNI/ig)) column.unique = true;
             column.nullable = postgresqlColumn.is_nullable === 'YES' ? 0.1 : 0;
             column.max = postgresqlColumn.character_maximum_length || postgresqlColumn.numeric_precision || 255;
-            if (postgresqlColumn.column_type && postgresqlColumn.column_type.includes('unsigned')) column.unsigned = true;
-            if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
+            // @todo gestion auto increment pour postgresql
+            //if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
             switch (postgresqlColumn.data_type) {
                 case 'bool':
                 case 'boolean':
@@ -130,58 +130,33 @@ export class PostgresConnector implements DatabaseConnector {
                     break;
                 case 'smallint':
                     column.generator = Generators.integer;
-                    if (column.unsigned) {
-                        column.min = 0;
-                        column.max = 65535;
-                    } else {
-                        column.min = -32768;
-                        column.max = 32767;
-                    }
+                    column.min = -32768;
+                    column.max = 32767;
                     break;
                 case 'mediumint':
                     column.generator = Generators.integer;
-                    if (column.unsigned) {
-                        column.min = 0;
-                        column.max = 16777215;
-                    } else {
-                        column.min = -8388608;
-                        column.max = 8388607;
-                    }
+                    column.min = -8388608;
+                    column.max = 8388607;
                     break;
                 case 'tinyint':
                     column.generator = Generators.integer;
-                    if (column.unsigned) {
-                        column.min = 0;
-                        column.max = 255;
-                    } else {
-                        column.min = -128;
-                        column.max = 127;
-                    }
+                    column.min = -128;
+                    column.max = 127;
                     break;
                 case 'int':
                 case 'integer':
                 case 'bigint':
                     column.generator = Generators.integer;
-                    if (column.unsigned) {
-                        column.min = 0;
-                        column.max = 2147483647;
-                    } else {
-                        column.min = -2147483648;
-                        column.max = 2147483647;
-                    }
+                    column.min = -2147483648;
+                    column.max = 2147483647;
                     break;
                 case 'decimal':
                 case 'dec':
                 case 'float':
                 case 'double':
                     column.generator = Generators.real;
-                    if (column.unsigned) {
-                        column.min = 0;
-                        column.max = 2147483647;
-                    } else {
-                        column.min = -2147483648;
-                        column.max = 2147483647;
-                    }
+                    column.min = -2147483648;
+                    column.max = 2147483647;
                     break;
                 case 'date':
                 case 'datetime':

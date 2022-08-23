@@ -2,7 +2,7 @@ import { Builder } from '../builder';
 import { GeneratorBuilder } from '../generation/generators';
 import { Generators } from '../generation/generators/generators';
 import { CustomSchema } from './custom-schema.class';
-import { Column, ForeignKey, Schema, Table } from './schema.class';
+import { MariaDbColumn, ForeignKey, Schema, Table } from './schema.class';
 
 export class CustomizedSchema extends CustomSchema {
     public tables: CustomizedTable[] = [];
@@ -156,7 +156,7 @@ export class CustomizedTable {
     disableTriggers: boolean = false;
 }
 
-export class CustomizedColumn extends Column {
+export class CustomizedColumn extends MariaDbColumn {
     foreignKey?: CustomizedForeignKey;
     values?: ParsedValues;
 }

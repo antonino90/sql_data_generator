@@ -2,11 +2,11 @@ import { Builder } from '../../src/builder';
 import { Generators } from '../../src/generation/generators/generators';
 import { CustomSchema } from '../../src/schema/custom-schema.class';
 import { CustomizedSchema } from '../../src/schema/customized-schema.class';
-import { Column, Schema, Table } from '../../src/schema/schema.class';
+import { MariaDbColumn, Schema, Table } from '../../src/schema/schema.class';
 
 describe('CustomizedSchema', () => {
     it('handle missing custom table', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.string)
             .build();
@@ -25,7 +25,7 @@ describe('CustomizedSchema', () => {
         expect(result.tables[0].maxLines).toBe(1000);
     });
     it('overrides options with global settings', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.integer)
             .set('max', 10)
@@ -54,7 +54,7 @@ describe('CustomizedSchema', () => {
         expect(result.tables[0].columns[0].autoIncrement).toBeTruthy();
     });
     it('overrides table options', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.string)
             .build();
@@ -78,7 +78,7 @@ describe('CustomizedSchema', () => {
         expect(result.tables[0].maxLines).toBe(100);
     });
     it('overrides column options', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.string)
             .build();
@@ -109,7 +109,7 @@ describe('CustomizedSchema', () => {
         expect(result.tables[0].columns[0].max).toBe(10);
     });
     it('Column options takes in account default maxLengthValue', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.string)
             .build();
@@ -140,7 +140,7 @@ describe('CustomizedSchema', () => {
         expect(result.tables[0].columns[0].max).toBe(36);
     });
     it('Column options do not override maxLengthValue', async () => {
-        const column = new Builder(Column)
+        const column = new Builder(MariaDbColumn)
             .set('name', 'column1')
             .set('generator', Generators.string)
             .build();
@@ -173,15 +173,15 @@ describe('CustomizedSchema', () => {
     });
     it('reorder columns', async () => {
         const columns = [
-            new Builder(Column)
+            new Builder(MariaDbColumn)
                 .set('name', 'column1')
                 .set('generator', Generators.string)
                 .build(),
-            new Builder(Column)
+            new Builder(MariaDbColumn)
                 .set('name', 'column2')
                 .set('generator', Generators.string)
                 .build(),
-            new Builder(Column)
+            new Builder(MariaDbColumn)
                 .set('name', 'column3')
                 .set('generator', Generators.string)
                 .build(),

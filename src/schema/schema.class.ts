@@ -28,8 +28,8 @@ export class Table {
     name: string = '';
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => Column)
-    columns: Column[] = [];
+    @Type(() => BaseColumn)
+    columns: MariaDbColumn[] | PostgresColumn[] = [];
     @IsArray()
     referencedTables: string[] = [];
 }
@@ -47,7 +47,7 @@ export enum Monotonic {
     NONE = 'NONE',
 }
 
-export class Column {
+class BaseColumn {
     @IsString()
     name: string = '';
     @IsString()
@@ -58,8 +58,6 @@ export class Column {
     unique: boolean = false;
     @IsBoolean()
     autoIncrement: boolean = false;
-    @IsBoolean()
-    unsigned: boolean = false;
     @IsNumber()
     min: number = 0;
     @IsNumber()
@@ -88,3 +86,10 @@ export class Column {
     @IsString()
     locale?: string;
 }
+
+export class MariaDbColumn extends BaseColumn {
+    @IsBoolean()
+    unsigned: boolean = false;
+}
+
+export class PostgresColumn extends BaseColumn {}

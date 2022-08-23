@@ -43,12 +43,12 @@ interface PostgreSQLColumn {
     datetime_precision: number;
     character_set_name: string;
     collation_name: string;
-    column_type: string;
-    column_key: string;
     extra: string;
     privileges: string;
     column_comment: string;
     foreign_values: any[];
+    column_type?: string;
+    column_key?: string;
     enum_values?: string;
 }
 

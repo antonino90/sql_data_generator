@@ -5,7 +5,7 @@ import { Connection, MysqlError } from 'mysql';
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
-import { Column, Schema, Table } from '../schema/schema.class';
+import { MariaDbColumn, Schema, Table } from '../schema/schema.class';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class MariaDBConnector implements DatabaseConnector {
@@ -118,7 +118,7 @@ export class MariaDBConnector implements DatabaseConnector {
             });
 
         table.columns = columns.map((mysqlColumn: MySQLColumn) => {
-            const column = new Column();
+            const column = new MariaDbColumn();
             column.name = mysqlColumn.COLUMN_NAME;
             if (mysqlColumn.COLUMN_KEY && mysqlColumn.COLUMN_KEY.match(/PRI|UNI/ig)) column.unique = true;
             column.nullable = mysqlColumn.IS_NULLABLE === 'YES' ? 0.1 : 0;

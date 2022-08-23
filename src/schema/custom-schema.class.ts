@@ -2,7 +2,7 @@ import { classToPlain, plainToClass, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, ValidateNested, validateOrReject } from 'class-validator';
 import { DatabaseEngines } from '../database/database-engines';
 import { Generators } from '../generation/generators/generators';
-import { Column } from './schema.class';
+import { MariaDbColumn } from './schema.class';
 
 export class CustomSettings {
     @IsArray()
@@ -31,7 +31,7 @@ export class CustomSettings {
     values: { [key: string]: any[]; } = {};
     options: {
         generators: Generators[],
-        options: Partial<Column>;
+        options: Partial<MariaDbColumn>;
     }[] = [];
     @IsNumber()
     @IsOptional()
@@ -87,4 +87,4 @@ export class CustomTable {
     template?: any;
 }
 
-type CustomColumn = { name: string; } & Partial<Column>;
+type CustomColumn = { name: string; } & Partial<MariaDbColumn>;
