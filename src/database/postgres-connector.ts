@@ -5,7 +5,7 @@ import { Connection, MysqlError } from 'mysql'; // todo manage psql error
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
-import { MariaDbColumn, PostgresColumn, Schema, Table } from '../schema/schema.class';
+import { PostgresColumn, Schema, Table } from '../schema/schema.class';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class PostgresConnector implements DatabaseConnector {
@@ -64,12 +64,12 @@ export class PostgresConnector implements DatabaseConnector {
     }
 
     async countLines(table: Table) {
-        return (await this.dbConnection(table.name).count())[0]['count(*)'] as number;
+        const getTotalCount = await this.dbConnection(table.name).count().first();
+        return (getTotalCount?.count) ? Number(getTotalCount.count) : 0;
     }
 
     async emptyTable(table: Table) {
-        await this.dbConnection.raw(`DELETE FROM \`${table.name}\``);
-        await this.dbConnection.raw(`ALTER TABLE \`${table.name}\` AUTO_INCREMENT = 1;`);
+        await this.dbConnection.raw(`TRUNCATE TABLE "${table.name}" RESTART IDENTITY CASCADE`);
     }
 
     async executeRawQuery(query: string) {
@@ -78,13 +78,12 @@ export class PostgresConnector implements DatabaseConnector {
 
     async insert(table: string, rows: any[]): Promise<number> {
         if (rows.length === 0) return 0;
-        const query = this.dbConnection(table)
-            .insert(rows)
-            .toQuery()
-            .replace('insert into', 'insert ignore into');
-        const insertResult = await this.dbConnection.raw(query);
+        const insertResult = await this.dbConnection.raw(
+          `? ON CONFLICT DO NOTHING;`,
+          [this.dbConnection(table).insert(rows)],
+        );
         await this.dbConnection.raw('COMMIT;');
-        return insertResult[0].affectedRows;
+        return Number(insertResult.rowCount);
     }
 
     async destroy() {
@@ -159,12 +158,15 @@ export class PostgresConnector implements DatabaseConnector {
                     break;
                 case 'date':
                 case 'datetime':
-                case 'timestamp':
+                case 'timestamp with time zone':
+                case 'timestamp without time zone':
                     column.generator = Generators.date;
                     column.minDate = '01-01-1970';
                     column.maxDate = undefined;
                     break;
-                case 'time':
+                case 'time with time zone':
+                case 'time without time zone':
+                case 'interval':
                     column.generator = Generators.time;
                     break;
                 case 'year':
@@ -172,19 +174,19 @@ export class PostgresConnector implements DatabaseConnector {
                     column.min = 1901;
                     column.max = 2155;
                     break;
-                case 'varchar':
-                case 'char':
-                case 'binary':
-                case 'varbinary':
-                case 'tinyblob':
+                case 'uuid':
+                case 'character varying':
                 case 'text':
-                case 'tinytext':
-                case 'mediumtext':
-                case 'longtext':
-                case 'blob':
-                case 'mediumblob': // 16777215
-                case 'longblob': // 4,294,967,295
                     column.generator = Generators.string;
+                    break;
+                case 'ARRAY':
+                    column.generator = Generators.string;
+                    /**
+                     * @todo introduce generator with array of type (int[], varchar(255)[]..)
+                     * SELECT column_name, data_type, udt_name::regtype
+                     FROM information_schema.columns
+                     WHERE table_schema = 'public' and data_type = 'ARRAY'
+                     */
                     break;
                 case 'bit':
                 case 'set':
@@ -218,7 +220,7 @@ export class PostgresConnector implements DatabaseConnector {
     public async backupTriggers(tables: string[]): Promise<void> {
         const triggers = await this.dbConnection
             .select()
-            .from('information_schema.TRIGGERS')
+            .from('information_schema.triggers')
             .where('event_object_schema', this.database)
             .whereIn(`event_object_table`, tables);
         this.triggers = this.triggers.concat(triggers);

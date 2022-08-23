@@ -12,7 +12,7 @@ export class CustomSettings {
     @ValidateNested({ each: true })
     afterAll: string[] = [];
     @IsEnum(DatabaseEngines)
-    engine: DatabaseEngines = DatabaseEngines.MARIADB;
+    engine: DatabaseEngines = DatabaseEngines.MARIADB; // @todo should be dynamic value depending on current engine
     @IsBoolean()
     disableTriggers: boolean = false;
     @IsArray()
