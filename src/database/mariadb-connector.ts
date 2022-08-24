@@ -20,7 +20,7 @@ export class MariaDBConnector implements DatabaseConnector {
         private database: string,
     ) {
         this.uriComponents = URI.parse(this.uri);
-        if (!this.uriComponents.path) throw new Error('Please sepcify database name');
+        if (!this.uriComponents.path) throw new Error('Please specify database name');
         this.dbConnection = Knex({
             client: 'mysql',
             connection: this.uri,
