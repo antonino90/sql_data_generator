@@ -1,16 +1,17 @@
 {
-    "name": "@corteks/mysql-data-generator",
+    "name": "@antonino90/sql-data-generator",
     "version": "1.1.1",
     "author": "Corteks",
     "keywords": [
         "database",
         "random",
         "mysql",
-        "mariadb"
+        "mariadb",
+        "postgreSQL"
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Corteks-team/mysql_data_generator.git"
+        "url": "git+https://github.com/antonino90/sql_data_generator.git"
     },
     "main": "lib/main.js",
     "bin": {
@@ -38,7 +39,6 @@
         "moment": "^2.29.0",
         "mysql": "^2.18.1",
         "pg": "^8.7.3",
-        "postgres": "^3.2.4",
         "random-js": "^2.1.0",
         "uri-js": "^4.4.1",
         "yargs": "^15.4.1"

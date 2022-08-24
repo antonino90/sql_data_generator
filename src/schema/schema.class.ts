@@ -93,6 +93,10 @@ class BaseColumn {
 export class MariaDbColumn extends BaseColumn {
     @IsBoolean()
     unsigned: boolean = false;
+
+    @ValidateNested()
+    @IsOptional()
+    values?: Values;
 }
 
 export class PostgresColumn extends BaseColumn {}
