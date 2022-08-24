@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import Knex from 'knex';
 import { getLogger } from 'log4js';
-import { Connection, MysqlError } from 'mysql'; // todo manage psql error
+import { PoolClient } from 'pg';
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
@@ -14,16 +14,13 @@ export class PostgresConnector implements DatabaseConnector {
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
     private uriComponents: URI.URIComponents;
-    private database: string;
 
     constructor(
         private uri: string,
+        private database: string
     ) {
         this.uriComponents = URI.parse(this.uri);
         if (!this.uriComponents.path) throw new Error('Please specify database name');
-
-        //this.database = this.uriComponents.path.replace('/', ''); // todo add cli parameter for that
-        this.database = 'public';
 
         this.dbConnection = Knex({
             client: 'pg',
@@ -44,9 +41,9 @@ export class PostgresConnector implements DatabaseConnector {
                 },
             },
             pool: {
-                afterCreate: (conn: Connection, done: (err: MysqlError | null, conn: Connection) => void) => {
-                    conn.query('SET session_replication_role = "replica";', (err1) => done(err1, conn));
-                },
+                afterCreate: (client: PoolClient, done: (err: Error | null, client: PoolClient) => void) =>
+                  client.query('SET session_replication_role = "replica";', (err1) => done(err1, client))
+                ,
             },
         }).on('query-error', (err) => {
             this.logger.error(err.code, err.name);

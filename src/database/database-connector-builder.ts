@@ -36,6 +36,7 @@ export class DatabaseConnectorBuilder {
 
     constructor(
         private uri: string,
+        private schema: string,
     ) {
         this.uriComponents = URI.parse(this.uri);
     }
@@ -45,11 +46,11 @@ export class DatabaseConnectorBuilder {
         switch (this.uriComponents.scheme) {
             case DatabaseEngines.MYSQL:
             case DatabaseEngines.MARIADB:
-                connector = new MariaDBConnector(this.uri);
+                connector = new MariaDBConnector(this.uri, this.schema);
                 await connector.init();
                 break;
             case DatabaseEngines.POSTGRES:
-                connector = new PostgresConnector(this.uri);
+                connector = new PostgresConnector(this.uri, this.schema);
                 await connector.init();
                 break;
             default:

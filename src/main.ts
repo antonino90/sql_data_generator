@@ -31,13 +31,16 @@ class Main extends CliMainClass {
     @CliParameter({ description: 'Schema filename to use. Will be generated with --analyse' })
     private schema: string = 'schema';
 
+    @CliParameter({ description: 'Database schema to use. Schema with vaue "public" will be used by default' })
+    private db_schema: string = 'public';
+
     private dbConnector: DatabaseConnector | undefined;
     private filler: Filler | undefined;
 
     async main(): Promise<number> {
         if (!this.uri) throw new Error('Please provide a valid database uri');
 
-        const dbConnectorBuilder = new DatabaseConnectorBuilder(this.uri);
+        const dbConnectorBuilder = new DatabaseConnectorBuilder(this.uri, this.db_schema);
         try {
             this.dbConnector = await dbConnectorBuilder.build();
         } catch (err) {
@@ -132,15 +135,7 @@ class Main extends CliMainClass {
         let previousEvent: ProgressEvent = { currentTable: '', currentValue: 0, max: 0, state: 'DONE', step: '' };
         let currentProgress: SingleBar;
         return (event: ProgressEvent) => {
-            let diff = false;
-            if (previousEvent.currentTable !== event.currentTable) {
-                logger.info(colors.green(event.currentTable));
-                diff = true;
-            }
-            if (previousEvent.step !== event.step) {
-                diff = true;
-            }
-            if (diff === true) {
+            if (Main.hasChangesDetected(previousEvent, event)) {
                 if (currentProgress) currentProgress.stop();
                 currentProgress = new cliProgress.SingleBar({
                     format: `${event.step + new Array(16 - event.step.length).join(' ')} | ${colors.cyan('{bar}')} | {percentage}% | {value}/{total} | {comment}`,
@@ -154,6 +149,15 @@ class Main extends CliMainClass {
             }
             previousEvent = event;
         };
+    }
+
+    private static hasChangesDetected(previousEvent: ProgressEvent, event: ProgressEvent) {
+        if (previousEvent.currentTable !== event.currentTable) {
+            logger.info(colors.green(event.currentTable));
+            return true;
+        }
+
+        return previousEvent.step !== event.step;
     }
 
     @KeyPress('n', Modifiers.NONE, 'Skip the current table. Only works during data generation phase.')

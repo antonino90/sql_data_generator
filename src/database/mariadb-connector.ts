@@ -14,14 +14,13 @@ export class MariaDBConnector implements DatabaseConnector {
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
     private uriComponents: URI.URIComponents;
-    private database: string;
 
     constructor(
         private uri: string,
+        private database: string,
     ) {
         this.uriComponents = URI.parse(this.uri);
         if (!this.uriComponents.path) throw new Error('Please sepcify database name');
-        this.database = this.uriComponents.path.replace('/', '');
         this.dbConnection = Knex({
             client: 'mysql',
             connection: this.uri,
