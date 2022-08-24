@@ -120,7 +120,7 @@ export class CustomizedSchema extends CustomSchema {
                     return t.name === tableName;
                 });
                 if (referencedTable) recursive(([] as CustomizedTable[]).concat(branch, referencedTable));
-            };
+            }
 
             if (sortedTables.find((t) => t.name.toLowerCase() === table.name.toLowerCase())) return;
             sortedTables.push({
@@ -128,7 +128,7 @@ export class CustomizedSchema extends CustomSchema {
                 disableTriggers: table.disableTriggers,
                 maxLines: table.maxLines,
                 addLines: table.addLines,
-                deltaRows: table.addLines || table.maxLines,
+                deltaRows: table.addLines || table.maxLines || Infinity,
                 columns: table.columns,
                 before: table.before,
                 after: table.after,
@@ -151,8 +151,8 @@ export class CustomizedTable {
     referencedTables: string[] = [];
     before: string[] = [];
     after: string[] = [];
-    maxLines: number = 1000;
-    addLines: number = Infinity;
+    maxLines?: number;
+    addLines?: number;
     deltaRows: number = 0;
     disableTriggers: boolean = false;
 }

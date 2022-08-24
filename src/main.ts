@@ -31,7 +31,7 @@ class Main extends CliMainClass {
     @CliParameter({ description: 'Schema filename to use. Will be generated with --analyse' })
     private schema: string = 'schema';
 
-    @CliParameter({ description: 'Database schema to use. Schema with vaue "public" will be used by default' })
+    @CliParameter({ description: 'Database schema to use. Schema with value "public" will be used by default' })
     private db_schema: string = 'public';
 
     private dbConnector: DatabaseConnector | undefined;

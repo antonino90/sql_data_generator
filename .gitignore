@@ -5,7 +5,11 @@ coverage
 triggers.json
 settings
 
-.yarn/*
+/.yarn/*
+!/.yarn/patches
+!/.yarn/plugins
+!/.yarn/releases
+!/.yarn/sdks
 .pnp.*
 
 # debug

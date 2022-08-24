@@ -38,6 +38,8 @@ export class CustomSettings {
     seed?: number;
     @IsNumber()
     maxRowsPerBatch: number = 1000;
+    @IsNumber()
+    minRowsPerTable: number = 1000;
 }
 
 export class CustomSchema {

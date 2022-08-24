@@ -92,12 +92,8 @@ export class Filler {
         let previousRunRows: number = -1;
 
         let currentNbRows: number = await this.dbConnector.countLines(table);
-        let maxLines = 0;
-        if (table.addLines !== undefined) {
-            maxLines = currentNbRows + table.addLines;
-            if (table.maxLines !== undefined) maxLines = Math.min(maxLines, table.maxLines);
-        }
-        else if (table.maxLines !== undefined) maxLines = table.maxLines;
+        let maxLines = this.calculateMaxLinesPerRow(table, currentNbRows);
+
         let insertedRows = 0;
 
         table.deltaRows = maxLines - currentNbRows;
@@ -149,6 +145,25 @@ export class Filler {
         }
         this.callback({ currentTable: table.name, step: 'generateData', state: 'DONE', currentValue: currentNbRows, max: maxLines });
         return insertedRows;
+    }
+
+    private calculateMaxLinesPerRow(table: CustomizedTable, currentNbRows: number) {
+        let maxLines = 0;
+        if (table.addLines !== undefined) {
+            maxLines = currentNbRows + table.addLines;
+            if (table.maxLines !== undefined) maxLines = Math.min(maxLines, table.maxLines);
+            return maxLines;
+        }
+
+        if (table.maxLines !== undefined) {
+            return table.maxLines;
+        }
+
+        if (this.schema.settings.minRowsPerTable !== undefined) {
+            return this.schema.settings.minRowsPerTable;
+        }
+
+        return maxLines;
     }
 
     private async after(table: CustomizedTable) {
