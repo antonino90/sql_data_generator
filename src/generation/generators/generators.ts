@@ -12,6 +12,7 @@ export enum Generators {
     string = 'string',
     uuid = 'uuid',
     values = 'values',
+    array = 'array',
     foreignKey = 'foreignKey',
     function = 'function',
     faker = 'faker',

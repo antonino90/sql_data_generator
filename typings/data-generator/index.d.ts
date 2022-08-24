@@ -50,6 +50,7 @@ interface PostgreSQLColumn {
     column_type?: string;
     column_key?: string;
     enum_values?: string;
+    element_array_data_type?: string;
 }
 
 interface MySqlTrigger {
@@ -119,4 +120,11 @@ interface ColumnEnumQueryType {
 interface ColumnAutoIncrementQueryType {
     table_name: string;
     column_name: string;
+}
+
+interface DetailsForColumnTypeARRAYQueryType {
+    table_name: string;
+    column_name: string;
+    data_type: string,
+    element_array_data_type: string,
 }

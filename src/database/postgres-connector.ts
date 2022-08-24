@@ -121,6 +121,7 @@ export class PostgresConnector implements DatabaseConnector {
             column.nullable = postgresqlColumn.is_nullable === 'YES' ? 0.1 : 0;
             column.max = postgresqlColumn.character_maximum_length || postgresqlColumn.numeric_precision || 255;
             if (postgresqlColumn.extra && postgresqlColumn.extra.includes('auto_increment')) column.autoIncrement = true;
+
             switch (postgresqlColumn.data_type) {
                 case 'bool':
                 case 'boolean':
@@ -179,18 +180,15 @@ export class PostgresConnector implements DatabaseConnector {
                 case 'text':
                     column.generator = Generators.string;
                     break;
-                case 'ARRAY':
-                    /**
-                     * @todo introduce generator with array of type (int[], varchar(255)[]..)
-                     * SELECT column_name, data_type, udt_name::regtype
-                     FROM information_schema.columns
-                     WHERE table_schema = 'public' and data_type = 'ARRAY'
-                     */
-                    break;
                 case 'bit':
                 case 'bit varying':
                     column.generator = Generators.bit;
                     column.max = postgresqlColumn.numeric_precision;
+                    break;
+                case 'array':
+                    column.generator = Generators.array;
+                    column.arrayElementType = postgresqlColumn.element_array_data_type;
+                    column.max = 5;
                     break;
                 case 'enum':
                     column.generator = Generators.values;
@@ -312,7 +310,23 @@ export class PostgresConnector implements DatabaseConnector {
                     column.extra = 'auto_increment';
                 }
                 return column;
-            })
+            });
+        }
+
+        const hasColumnWithTypeARRAY = columnsData.some((c) => c.data_type === 'ARRAY');
+        if (hasColumnWithTypeARRAY) {
+            const detailsForColumnTypeARRAY = await this.getDetailsForColumnTypeARRAY(table);
+            if (detailsForColumnTypeARRAY.length) {
+                columnsData = columnsData.map((column) => {
+                    const match = detailsForColumnTypeARRAY.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                    if (match) {
+                        column.data_type = 'array';
+                        column.element_array_data_type = match.element_array_data_type.match(/int|numeric|decimal|double/ig) ? 'int' : 'text';
+                    }
+
+                    return column;
+                })
+            }
         }
 
         return columnsData;
@@ -374,6 +388,26 @@ export class PostgresConnector implements DatabaseConnector {
           .where('col.table_schema', this.database)
           .andWhere('col.table_name', table.name)
           .andWhere('seq.increment', '1');
+    }
+
+    private async getDetailsForColumnTypeARRAY(table: Table): Promise<DetailsForColumnTypeARRAYQueryType[]> {
+        const queryParamOnInnerJoin = this.dbConnection.raw('?', ['TABLE']);
+        return this.dbConnection
+          .select<DetailsForColumnTypeARRAYQueryType[]>([
+              'col.table_name',
+              'col.column_name',
+              'col.data_type',
+              'ele.data_type AS element_array_data_type'
+          ])
+          .from('information_schema.columns AS col')
+          .innerJoin('information_schema.element_types AS ele', function() {
+              this.on('col.table_catalog', 'ele.object_catalog')
+                .andOn('col.table_schema', 'ele.object_schema')
+                .andOn('ele.object_type', queryParamOnInnerJoin)
+                .andOn('col.dtd_identifier', 'ele.collection_type_identifier')
+          })
+          .where('col.table_schema', this.database)
+          .andWhere('col.table_name', table.name);
     }
 
     async getForeignKeys(table: Table) {

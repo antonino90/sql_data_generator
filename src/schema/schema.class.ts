@@ -85,6 +85,9 @@ class BaseColumn {
     @IsOptional()
     @IsString()
     locale?: string;
+    @IsOptional()
+    @IsString()
+    arrayElementType?: string;
 }
 
 export class MariaDbColumn extends BaseColumn {

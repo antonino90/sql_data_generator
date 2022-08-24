@@ -14,6 +14,7 @@ import { StringGenerator } from './string.generator';
 import { TimeGenerator } from './time.generator';
 import { ValuesGenerator } from './values.generator';
 import { UuidGenerator } from "./uuid.generator";
+import { ArrayGenerator } from "./array.generator";
 
 
 export class GeneratorBuilder {
@@ -51,6 +52,9 @@ export class GeneratorBuilder {
                 break;
             case Generators.values:
                 ValuesGenerator.validate(table, column);
+                break;
+            case Generators.array:
+                ArrayGenerator.validate(table, column);
                 break;
             case Generators.foreignKey:
                 ForeignKeyGenerator.validate(table, column);
@@ -109,6 +113,9 @@ export class GeneratorBuilder {
                 break;
             case Generators.faker:
                 generator = new FakerGenerator(this.random, this.table, column);
+                break;
+            case Generators.array:
+                generator = new ArrayGenerator(this.random, this.table, column);
                 break;
             case Generators.none:
             default:
