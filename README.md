@@ -1,4 +1,4 @@
-# MySQL Data Generator
+# MySQL/MariaDB/PostgreSQL Data Generator
 
 This is a tool to easily fill a SQL database.
 It is able to analyse a schema and generate a `settings/schema.jsonc` which will be used to generate accurate data. It does its best to handle foreign keys.
@@ -57,14 +57,16 @@ Available options in `schema_custom.json`:
   - `seed: number` // The seed used by the random generator. This is optional. filling process.
   - `tablesToFill: string[]` // list of table name that should be analysed and filled. You can set this parameter or `ignoredTables` depending on the number of table to work with
   - `values: [key: string]: any[]` // an object of user defined array of values
+  - `maxRowsPerBatch: number` // Hard limit of the maximum number of row insert in a loop (chunked insert)
+  - `minRowsPerTable: number` // Hard limit of the maximum number of row per table (can be override per table in schema_custom.jsonc with maxLines/addLines fields) - `1000` rows per table by default.
 - `tables: Table[]` // list of tables handled by the tool
   - `Table.name: string` // table name
   - `Table.lines: number` // Deprecated in favor of maxLines
-  - `Table.maxLines: number` // Maximum number of rows this table should contains
-  - `Table.addLines: number` // Number of rows to be inserted on a single run. The number of lines resulting in the table will not exceed `Table.maxLines`
+  - `Table.maxLines: number` // Maximum number of rows this table should contains. This will override your custom value `minRowsPerTable`.
+  - `Table.addLines: number` // Number of rows to be inserted on a single run. The number of lines resulting in the table will not exceed `Table.maxLines`. This will override your custom value `minRowsPerTable`.
   - `Table.columns: Column[]` // list of columns handled by the tool
     - `Column.name: string` // column name
-    - `Column.generator: bit | boolean | date | foreignKey | integer | real | time | string | values | function | faker` // data type generator used for this column
+    - `Column.generator: bit | boolean | date | foreignKey | integer | real | time | string | values | function | faker | uuid | array` // data type generator used for this column
     - `Column.[key: string]: any[]` // list of options for this column
     - `Column.foreignKey: { table: string, column: string, where: string }` // link to the table.column referenced by this foreign key. A custom clause can ba added to filter value from the foreign column
     - `Column.values: string | any[] | { [key: string]: number }`
@@ -74,3 +76,4 @@ Available options in `schema_custom.json`:
     - `Column.customFunction: (rowIndex: number, row: { [key: string]: string | number }` // a string representing a javascript custom function. It will receive the row index and the full row as arguments.
     - `Column.template: string` // a template string for `faker` generator. See [fakerjs](https://www.npmjs.com/package/@faker-js/faker) for more information.
     - `Column.locale: string` // locale used by the faker generator.
+    - `Column.arrayElementType:string` // Used by generator 'array' - should define the array sub element type (`int|text`) - Postgresql engine only
