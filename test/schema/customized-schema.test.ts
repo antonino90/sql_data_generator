@@ -6,7 +6,7 @@ import { MariaDbColumn, Schema, Table, PostgresColumn } from '../../src/schema/s
 
 describe('CustomizedSchema', () => {
     describe.each([MariaDbColumn, PostgresColumn])(
-      '%s',  // <-- This %s will format the first item in each test suite array.
+      '%s',
       (dbType, account) => {
           it('handle missing custom table', async () => {
               const column = new Builder(dbType)
@@ -25,7 +25,8 @@ describe('CustomizedSchema', () => {
               schema.tables = [table];
 
               const result = CustomizedSchema.create(schema);
-              expect(result.tables[0].maxLines).toBe(1000);
+              expect(result.tables[0].maxLines).toBe(undefined);
+              expect(result.tables[0].addLines).toBe(undefined);
           });
           it('overrides options with global settings', async () => {
               const column = new Builder(dbType)

@@ -13,8 +13,8 @@ import { RealGenerator } from './real.generator';
 import { StringGenerator } from './string.generator';
 import { TimeGenerator } from './time.generator';
 import { ValuesGenerator } from './values.generator';
-import { UuidGenerator } from "./uuid.generator";
-import { ArrayGenerator } from "./array.generator";
+import { UuidGenerator } from './uuid.generator';
+import { ArrayGenerator } from './array.generator';
 
 
 export class GeneratorBuilder {
