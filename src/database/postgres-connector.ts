@@ -42,7 +42,11 @@ export class PostgresConnector implements DatabaseConnector {
             },
             pool: {
                 afterCreate: (client: PoolClient, done: (err: Error | null, client: PoolClient) => void) =>
-                  client.query('SET session_replication_role = "replica";', (err1) => done(err1, client))
+                  client.query('SET session_replication_role = "replica";', (err1) => {
+                      if (err1) done(err1, client)
+                      else
+                          client.query('SET enable_seqscan TO off', (err2) => done(err2, client))
+                  })
                 ,
             },
         }).on('query-error', (err) => {
@@ -55,9 +59,8 @@ export class PostgresConnector implements DatabaseConnector {
     }
 
     public async init(): Promise<void> {
-        this.logger.warn(`For performance foreign_key_checks, autocommit and unique_checks are disabled during insert.`);
+        this.logger.warn(`For performance session_replication_role, enable_seqscan are disabled during insert.`);
         this.logger.warn(`They are disabled per connections and should not alter your configuration.`);
-        this.logger.info(`To improve performances further you can update innodb_autoinc_lock_mode = 0 in your my.ini.`);
     }
 
     async countLines(table: Table) {
