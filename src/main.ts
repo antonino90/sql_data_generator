@@ -32,7 +32,7 @@ class Main extends CliMainClass {
     private schema: string = 'schema';
 
     @CliParameter({ description: 'Database schema to use. Schema with value "public" will be used by default' })
-    private db_schema: string = 'public';
+    private dbSchema: string = 'public';
 
     private dbConnector: DatabaseConnector | undefined;
     private filler: Filler | undefined;
@@ -40,7 +40,7 @@ class Main extends CliMainClass {
     async main(): Promise<number> {
         if (!this.uri) throw new Error('Please provide a valid database uri');
 
-        const dbConnectorBuilder = new DatabaseConnectorBuilder(this.uri, this.db_schema);
+        const dbConnectorBuilder = new DatabaseConnectorBuilder(this.uri, this.dbSchema);
         try {
             this.dbConnector = await dbConnectorBuilder.build();
         } catch (err) {

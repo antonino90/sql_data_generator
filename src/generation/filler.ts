@@ -65,7 +65,13 @@ export class Filler {
             this.callback({ currentTable: '', step: 'beforeAll', state: 'RUNNING', currentValue: i, max: this.schema.settings.beforeAll.length });
             await this.dbConnector.executeRawQuery(this.schema.settings.beforeAll[i]);
         }
-        this.callback({ currentTable: '', step: 'beforeAll', state: 'DONE', currentValue: this.schema.settings.beforeAll.length, max: this.schema.settings.beforeAll.length });
+        this.callback({
+            currentTable: '',
+            step: 'beforeAll',
+            state: 'DONE',
+            currentValue: this.schema.settings.beforeAll.length,
+            max: this.schema.settings.beforeAll.length,
+        });
     }
 
     private async afterAll() {
@@ -75,7 +81,13 @@ export class Filler {
             this.callback({ currentTable: '', step: 'afterAll', state: 'RUNNING', currentValue: i, max: this.schema.settings.afterAll.length });
             await this.dbConnector.executeRawQuery(this.schema.settings.afterAll[i]);
         }
-        this.callback({ currentTable: '', step: 'afterAll', state: 'DONE', currentValue: this.schema.settings.afterAll.length, max: this.schema.settings.afterAll.length });
+        this.callback({
+            currentTable: '',
+            step: 'afterAll',
+            state: 'DONE',
+            currentValue: this.schema.settings.afterAll.length,
+            max: this.schema.settings.afterAll.length,
+        });
     }
 
     private async before(table: CustomizedTable) {
@@ -92,7 +104,7 @@ export class Filler {
         let previousRunRows: number = -1;
 
         let currentNbRows: number = await this.dbConnector.countLines(table);
-        let maxLines = this.calculateMaxLinesPerRow(table, currentNbRows);
+        const maxLines = this.calculateMaxLinesPerRow(table, currentNbRows);
 
         let insertedRows = 0;
 
@@ -122,7 +134,14 @@ export class Filler {
                     try {
                         row[column.name] = generators[c].generate(currentTableRow, row);
                     } catch (ex) {
-                        this.callback({ currentTable: table.name, step: 'generateData', state: 'RUNNING', currentValue: currentNbRows, max: maxLines, comment: (ex as Error).message + '. ' });
+                        this.callback({
+                            currentTable: table.name,
+                            step: 'generateData',
+                            state: 'RUNNING',
+                            currentValue: currentNbRows,
+                            max: maxLines,
+                            comment: (ex as Error).message + '. ',
+                        });
                         break BATCH_LOOP;
                     }
 
@@ -173,6 +192,11 @@ export class Filler {
             this.callback({ currentTable: table.name, step: 'after', state: 'RUNNING', currentValue: i, max: table.after.length });
             await this.dbConnector.executeRawQuery(table.after[i]);
         }
-        this.callback({ currentTable: table.name, step: 'after', state: 'DONE', currentValue: table.after.length, max: table.after.length });
+        this.callback({
+            currentTable: table.name,
+            step: 'after', state: 'DONE',
+            currentValue: table.after.length,
+            max: table.after.length,
+        });
     }
 }

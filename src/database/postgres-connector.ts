@@ -17,7 +17,7 @@ export class PostgresConnector implements DatabaseConnector {
 
     constructor(
         private uri: string,
-        private database: string
+        private database: string,
     ) {
         this.uriComponents = URI.parse(this.uri);
         if (!this.uriComponents.path) throw new Error('Please specify database name');
@@ -293,7 +293,13 @@ export class PostgresConnector implements DatabaseConnector {
         const columnsWithEnumType = await this.getColumnsWithEnumType(table);
         if (columnsWithEnumType.length) {
             columnsData = columnsData.map((column) => {
-                const match = columnsWithEnumType.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                const match = columnsWithEnumType.find((col) => {
+                    return (
+                      column.table_name.toLowerCase() === col.table_name.toLowerCase() &&
+                      column.column_name.toLowerCase() === col.column_name.toLowerCase()
+                    );
+                });
+
                 if (match) {
                     column.data_type = 'enum';
                     column.enum_values = match.enum_values;
@@ -305,7 +311,13 @@ export class PostgresConnector implements DatabaseConnector {
         const columnsWithAutoIncrement = await this.getColumnsWithAutoIncrement(table);
         if (columnsWithAutoIncrement.length) {
             columnsData = columnsData.map((column) => {
-                const match = columnsWithAutoIncrement.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                const match = columnsWithAutoIncrement.find((col) => {
+                    return (
+                      column.table_name.toLowerCase() === col.table_name.toLowerCase() &&
+                      column.column_name.toLowerCase() === col.column_name.toLowerCase()
+                    );
+                });
+
                 if (match) {
                     column.extra = 'auto_increment';
                 }
@@ -318,10 +330,18 @@ export class PostgresConnector implements DatabaseConnector {
             const detailsForColumnTypeARRAY = await this.getDetailsForColumnTypeARRAY(table);
             if (detailsForColumnTypeARRAY.length) {
                 columnsData = columnsData.map((column) => {
-                    const match = detailsForColumnTypeARRAY.find((col) => column.table_name.toLowerCase() === col.table_name.toLowerCase() && column.column_name.toLowerCase() === col.column_name.toLowerCase());
+                    const match = detailsForColumnTypeARRAY.find((col) => {
+                        return (
+                          column.table_name.toLowerCase() === col.table_name.toLowerCase() &&
+                          column.column_name.toLowerCase() === col.column_name.toLowerCase()
+                        );
+                    });
+
                     if (match) {
                         column.data_type = 'array';
-                        column.element_array_data_type = match.element_array_data_type.match(/int|numeric|decimal|double/ig) ? 'int' : 'text';
+                        column.element_array_data_type = match.element_array_data_type.match(
+                          /int|numeric|decimal|double/ig,
+                        ) ? 'int' : 'text';
                     }
 
                     return column;
@@ -337,9 +357,9 @@ export class PostgresConnector implements DatabaseConnector {
           .select<ColumnConstraintQueryType[]>([
               't.relname as table_name',
               'ix.relname as index_name',
-              this.dbConnection.raw("regexp_replace(pg_get_indexdef(indexrelid), '.*\\((.*)\\)', '\\1') as column_name"),
+              this.dbConnection.raw('regexp_replace(pg_get_indexdef(indexrelid), \'.*\\((.*)\\)\', \'\\1\') as column_name'),
               this.dbConnection.raw('indisunique'),
-              this.dbConnection.raw('indisprimary')
+              this.dbConnection.raw('indisprimary'),
           ])
           .from('pg_index AS i')
           .join('pg_class AS t', function () {
@@ -384,7 +404,7 @@ export class PostgresConnector implements DatabaseConnector {
               'col.column_name',
           ])
           .from('information_schema.columns AS col')
-          .joinRaw("INNER JOIN information_schema.sequences AS seq ON seq.sequence_name = REGEXP_REPLACE(substring(pg_get_serial_sequence(concat('\"', table_name, '\"'), column_name), 8), '\"', '', 'g')")
+          .joinRaw('INNER JOIN information_schema.sequences AS seq ON seq.sequence_name = REGEXP_REPLACE(substring(pg_get_serial_sequence(concat(\'"\', table_name, \'"\'), column_name), 8), \'"\', \'\', \'g\')')
           .where('col.table_schema', this.database)
           .andWhere('col.table_name', table.name)
           .andWhere('seq.increment', '1');
@@ -397,7 +417,7 @@ export class PostgresConnector implements DatabaseConnector {
               'col.table_name',
               'col.column_name',
               'col.data_type',
-              'ele.data_type AS element_array_data_type'
+              'ele.data_type AS element_array_data_type',
           ])
           .from('information_schema.columns AS col')
           .innerJoin('information_schema.element_types AS ele', function() {
@@ -433,11 +453,11 @@ export class PostgresConnector implements DatabaseConnector {
             'kcu.column_name AS column',
             'k2.table_name AS foreignTable',
             'k2.column_name AS foreignColumn',
-            'unique_index AS uniqueIndex'
+            'unique_index AS uniqueIndex',
         ])
             .from('information_schema.key_column_usage as kcu')
             .leftJoin('information_schema.referential_constraints AS fk', function () {
-              this.using(["constraint_schema", "constraint_name"])
+              this.using(['constraint_schema', 'constraint_name'])
             })
           .leftJoin('information_schema.key_column_usage AS k2', function () {
               this.on('k2.constraint_schema', 'fk.unique_constraint_schema')

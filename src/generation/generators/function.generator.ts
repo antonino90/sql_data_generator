@@ -12,6 +12,6 @@ export class FunctionGenerator extends AbstractGenerator<string | number | null>
     }
 
     generate(rowIndex: number, row: { [key: string]: any; }) {
-        return eval(this.column.customFunction!)(rowIndex, row);
+        return new Function('return ' + this.column.customFunction!)()(rowIndex, row);
     }
 }
