@@ -50,7 +50,7 @@ Available options in `schema_custom.json`:
 
 - `settings`: Global settings
   - `disableTriggers: boolean` // disable triggers per table during process and recreate them afterward
-  - `engine: "MariaDB"` // only MariaDB is supported for the time being but it should also be compatible with MySQL.
+  - `engine: "MariaDB" | "PostgreSQL"` // PostgreSQL and MariaDB are supported for the time being but it should also be compatible with MySQL.
   - `ignoredTables: string[]` // list of table name that should not be analysed nor filled
   - `options: Array<[key: string]: any[]>` // an array of column options to configure specific generators for the whole file `generator` is an array of string to allow multiple settings at once
   - `maxLengthValue: number?` // Hard limit of the maximum number of characters in `string` column type. This will override your custom column `max` value if it's bigger than `maxLengthValue`.
