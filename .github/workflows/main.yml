@@ -28,4 +28,5 @@ jobs:
       - run: yarn install --frozen-lockfile
       #- run: yarn prettier todo to active on next branch
       - run: yarn lint
+      - run: yarn audit --groups dependencies | grep -E "(high | critical)" -C1000 && exit 1 || echo '0 vulnerabilities found'
       - run: yarn test
