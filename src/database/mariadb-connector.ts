@@ -5,7 +5,7 @@ import { Connection, MysqlError } from 'mysql';
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
-import { MariaDbColumn, Schema, Table } from '../schema/schema.class';
+import { MariaDbColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class MariaDBConnector implements DatabaseConnector {

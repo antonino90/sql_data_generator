@@ -1,5 +1,5 @@
 import { AbstractGenerator } from './generators';
-import { Monotonic } from '../../schema/schema.class';
+import { Monotonic } from '../../schema/schema.validator';
 
 export class DateGenerator extends AbstractGenerator<Date> {
     protected values: Date[] = [];

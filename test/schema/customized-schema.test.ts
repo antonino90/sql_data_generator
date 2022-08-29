@@ -2,7 +2,7 @@ import { Builder } from '../../src/builder';
 import { Generators } from '../../src/generation/generators/generators';
 import { CustomSchema } from '../../src/schema/custom-schema.class';
 import { CustomizedSchema } from '../../src/schema/customized-schema.class';
-import { MariaDbColumn, Schema, Table, PostgresColumn } from '../../src/schema/schema.class';
+import { MariaDbColumn, Schema, Table, PostgresColumn } from '../../src/schema/schema.validator';
 
 describe('CustomizedSchema', () => {
     describe.each([MariaDbColumn, PostgresColumn])(

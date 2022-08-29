@@ -2,7 +2,7 @@ import { classToPlain, plainToClass, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, ValidateNested, validateOrReject } from 'class-validator';
 import { DatabaseEngines } from '../database/database-engines';
 import { Generators } from '../generation/generators/generators';
-import { MariaDbColumn } from './schema.class';
+import { MariaDbColumn } from './schema.validator';
 
 export class CustomSettings {
     @IsArray()

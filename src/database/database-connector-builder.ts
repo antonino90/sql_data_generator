@@ -1,5 +1,5 @@
 import * as URI from 'uri-js';
-import { ForeignKey, Schema, Table } from '../schema/schema.class';
+import { ForeignKey, Schema, Table } from '../schema/schema.validator';
 import { DatabaseEngines } from './database-engines';
 import { MariaDBConnector } from './mariadb-connector';
 import { PostgresConnector } from './postgres-connector';

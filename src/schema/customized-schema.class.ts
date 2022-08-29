@@ -2,7 +2,7 @@ import { Builder } from '../builder';
 import { GeneratorBuilder } from '../generation/generators';
 import { Generators } from '../generation/generators/generators';
 import { CustomSchema } from './custom-schema.class';
-import { MariaDbColumn, ForeignKey, Schema, Table, PostgresColumn } from './schema.class';
+import { MariaDbColumn, ForeignKey, Schema, Table, PostgresColumn } from './schema.validator';
 
 export class CustomizedSchema extends CustomSchema {
     public tables: CustomizedTable[] = [];

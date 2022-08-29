@@ -1,5 +1,5 @@
 import { DatabaseConnector } from '../src/database/database-connector-builder';
-import { Table } from '../src/schema/schema.class';
+import { Table } from '../src/schema/schema.validator';
 
 export class TestConnector implements DatabaseConnector {
     getSchema = jest.fn();

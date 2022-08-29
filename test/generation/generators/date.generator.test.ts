@@ -1,7 +1,7 @@
 import { MersenneTwister19937, Random } from 'random-js';
 import { DateGenerator } from '../../../src/generation/generators/date.generator';
 import { Generators } from '../../../src/generation/generators/generators';
-import { Monotonic } from '../../../src/schema/schema.class';
+import { Monotonic } from '../../../src/schema/schema.validator';
 import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
 import { Builder } from '../../../src/builder';
 

@@ -5,7 +5,7 @@ import { PoolClient } from 'pg';
 import * as path from 'path';
 import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
-import { PostgresColumn, Schema, Table } from '../schema/schema.class';
+import { PostgresColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class PostgresConnector implements DatabaseConnector {

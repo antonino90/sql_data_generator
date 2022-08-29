@@ -1,7 +1,7 @@
 import { MersenneTwister19937, Random } from 'random-js';
 import { DatabaseConnector } from '../database/database-connector-builder';
 import { CustomizedSchema, CustomizedTable } from '../schema/customized-schema.class';
-import { Table } from '../schema/schema.class';
+import { Table } from '../schema/schema.validator';
 import { GeneratorBuilder } from './generators';
 import { AbstractGenerator } from './generators/generators';
 
