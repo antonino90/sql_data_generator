@@ -29,6 +29,13 @@ export class SchemaAnalyseClass {
     }
 
     private storeSchemaToDisk(schema: Schema) {
+        if (!fs.pathExistsSync('settings')) {
+            fs.mkdirSync('settings');
+        }
+        if (!fs.pathExistsSync(path.join('settings', 'scripts'))) {
+            fs.mkdirSync(path.join('settings', 'scripts'));
+        }
+
         fs.writeJSONSync(path.join('settings', `${this.schema}.json`), schema.toJSON(), {spaces: 4});
         if (!fs.existsSync(path.join('settings', `${this.schema}_custom.jsonc`))) {
             const customSchema = new CustomSchema();

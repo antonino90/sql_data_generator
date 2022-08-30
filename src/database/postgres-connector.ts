@@ -3,7 +3,7 @@ import Knex from 'knex';
 import { getLogger } from 'log4js';
 import { PoolClient } from 'pg';
 import * as path from 'path';
-import * as URI from 'uri-js';
+
 import { Generators } from '../generation/generators/generators';
 import { PostgresColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
@@ -13,15 +13,11 @@ export class PostgresConnector implements DatabaseConnector {
     private triggers: PostgreSqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
-    private uriComponents: URI.URIComponents;
 
     constructor(
         private uri: string,
         private database: string,
     ) {
-        this.uriComponents = URI.parse(this.uri);
-        if (!this.uriComponents.path) throw new Error('Please specify database name');
-
         this.dbConnection = Knex({
             client: 'pg',
             // wrapIdentifier: (value, origImpl, queryContext) => value, to remove the quotes

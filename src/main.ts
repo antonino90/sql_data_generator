@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import { getLogger } from 'log4js';
 import * as path from 'path';
 import 'reflect-metadata';
+import * as URI from 'uri-js';
 
 import { DatabaseConnector, DatabaseConnectorBuilder } from './database/database-connector-builder';
 import { SchemaAnalyseClass } from './schema/schema-analyse.class';
@@ -25,27 +26,24 @@ class Main extends CliMainClass {
     @CliParameter({ description: 'Schema filename to use. Will be generated with --analyse' })
     private schema: string = 'schema';
 
-    @CliParameter({ description: 'Database schema to use. Schema with value "public" will be used by default' })
-    private dbSchema: string = 'public';
+    @CliParameter({ description: 'Database schema to use. Database name will be used by default as database schema value' })
+    private dbSchema: string = '';
 
     private dbConnector: DatabaseConnector | undefined;
 
     async main(): Promise<number> {
-        if (!this.uri) throw new Error('Please provide a valid database uri');
+        if (!this.uri) {
+            throw new Error('Please provide a valid database uri')
+        }
 
-        const dbConnectorBuilder = new DatabaseConnectorBuilder(this.uri, this.dbSchema);
         try {
-            this.dbConnector = await dbConnectorBuilder.build();
+            const { uriScheme, dbSchema } = Main.extractDataFromCliParameters(this.uri, this.dbSchema);
+            this.dbConnector = await (new DatabaseConnectorBuilder(this.uri, dbSchema)).build(uriScheme);
         } catch (err) {
             logger.error((err as Error).message);
             return 1;
         }
-        if (!fs.pathExistsSync('settings')) {
-            fs.mkdirSync('settings');
-        }
-        if (!fs.pathExistsSync(path.join('settings', 'scripts'))) {
-            fs.mkdirSync(path.join('settings', 'scripts'));
-        }
+
         try {
             if (this.analyse) {
                 await (new SchemaAnalyseClass(this.schema)).generateSchemaFromDB(this.dbConnector);
@@ -64,5 +62,17 @@ class Main extends CliMainClass {
             await this.dbConnector.destroy();
         }
         return 0;
+    }
+
+    private static extractDataFromCliParameters(uri: string, dbSchema: string | undefined) {
+        const uriComponents = URI.parse(uri);
+        if (!uriComponents.path) {
+            throw new Error('Please specify database name')
+        }
+
+        return {
+            uriScheme: uriComponents.scheme || '',
+            dbSchema: (dbSchema) ? dbSchema : uriComponents.path.replace('/', ''),
+        };
     }
 }

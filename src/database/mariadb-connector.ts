@@ -3,7 +3,6 @@ import Knex from 'knex';
 import { getLogger } from 'log4js';
 import { Connection, MysqlError } from 'mysql';
 import * as path from 'path';
-import * as URI from 'uri-js';
 import { Generators } from '../generation/generators/generators';
 import { MariaDbColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
@@ -13,14 +12,11 @@ export class MariaDBConnector implements DatabaseConnector {
     private triggers: MySqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
-    private uriComponents: URI.URIComponents;
 
     constructor(
-        private uri: string,
-        private database: string,
+      private uri: string,
+      private database: string,
     ) {
-        this.uriComponents = URI.parse(this.uri);
-        if (!this.uriComponents.path) throw new Error('Please specify database name');
         this.dbConnection = Knex({
             client: 'mysql',
             connection: this.uri,

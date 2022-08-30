@@ -32,29 +32,25 @@ export interface DatabaseConnector {
 }
 
 export class DatabaseConnectorBuilder {
-    private uriComponents: URI.URIComponents;
-
     constructor(
-        private uri: string,
-        private schema: string,
-    ) {
-        this.uriComponents = URI.parse(this.uri);
-    }
+      private uri: string,
+      private databaseSchema: string,
+    ) {}
 
-    public async build(): Promise<DatabaseConnector> {
+    public async build(engine: string): Promise<DatabaseConnector> {
         let connector: DatabaseConnector;
-        switch (this.uriComponents.scheme) {
+        switch (engine) {
             case DatabaseEngines.MYSQL:
             case DatabaseEngines.MARIADB:
-                connector = new MariaDBConnector(this.uri, this.schema);
+                connector = new MariaDBConnector(this.uri, this.databaseSchema);
                 await connector.init();
                 break;
             case DatabaseEngines.POSTGRES:
-                connector = new PostgresConnector(this.uri, this.schema);
+                connector = new PostgresConnector(this.uri, this.databaseSchema);
                 await connector.init();
                 break;
             default:
-                throw new Error(`Unsupported engine ${this.uriComponents.scheme}.`);
+                throw new Error(`Unsupported engine ${engine}.`);
         }
         return connector;
     }
