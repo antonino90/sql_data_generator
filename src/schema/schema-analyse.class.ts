@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra';
 import { getLogger } from 'log4js';
 import * as path from 'path';
-import 'reflect-metadata';
 
 import { DatabaseConnector } from '../database/database-connector-builder';
 import { CustomSchema } from './custom-schema.class';

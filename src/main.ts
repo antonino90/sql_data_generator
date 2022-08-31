@@ -1,7 +1,5 @@
 import { CliMain, CliMainClass, CliParameter } from '@corteks/clify';
-import * as fs from 'fs-extra';
 import { getLogger } from 'log4js';
-import * as path from 'path';
 import 'reflect-metadata';
 import * as URI from 'uri-js';
 

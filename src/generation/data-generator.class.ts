@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import * as fs from 'fs-extra';
 import { getLogger } from 'log4js';
 import * as path from 'path';
