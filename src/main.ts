@@ -7,9 +7,6 @@ import { DatabaseConnector, DatabaseConnectorBuilder } from './database/database
 import { SchemaAnalyseClass } from './schema/schema-analyse.class';
 import { DataGeneratorClass } from './generation/data-generator.class';
 
-const logger = getLogger();
-logger.level = 'debug';
-
 @CliMain
 class Main extends CliMainClass {
     @CliParameter({ alias: 'db', demandOption: true, description: 'Database URI. Eg: mysql://user:password@127.0.0.1:3306/database' })
@@ -28,6 +25,12 @@ class Main extends CliMainClass {
     private dbSchema: string = '';
 
     private dbConnector: DatabaseConnector | undefined;
+    private logger = getLogger();
+
+    constructor() {
+        super();
+        this.logger.level = 'debug';
+    }
 
     async main(): Promise<number> {
         if (!this.uri) {
@@ -38,7 +41,7 @@ class Main extends CliMainClass {
             const { uriScheme, dbSchema } = Main.extractDataFromCliParameters(this.uri, this.dbSchema);
             this.dbConnector = await (new DatabaseConnectorBuilder(this.uri, dbSchema)).build(uriScheme);
         } catch (err) {
-            logger.error((err as Error).message);
+            this.logger.error((err as Error).message);
             return 1;
         }
 
@@ -51,12 +54,12 @@ class Main extends CliMainClass {
             await (new DataGeneratorClass(this.schema, this.uri)).generateDataInDB(this.dbConnector, this.reset);
         } catch (ex) {
             if ((ex as any).code === 'ENOENT') {
-                logger.error(`Unable to read from ./settings/${this.schema}.json. Please run with --analyse first.`);
+                this.logger.error(`Unable to read from ./settings/${this.schema}.json. Please run with --analyse first.`);
             } else {
-                logger.error(ex);
+                this.logger.error(ex);
             }
         } finally {
-            logger.info('Close database connection');
+            this.logger.info('Close database connection');
             await this.dbConnector.destroy();
         }
         return 0;

@@ -14,17 +14,16 @@ import { Schema } from '../schema/schema.validator';
 import { CustomizedSchema } from '../schema/customized-schema.class';
 import { Filler, ProgressEvent } from './filler';
 
-const logger = getLogger();
-logger.level = 'debug';
-
 export class DataGeneratorClass {
     private readonly schema: string;
     private readonly uri: string | undefined;
+    private logger = getLogger();
     private filler: Filler | undefined;
 
     constructor(schema: string = 'schema', uri: string | undefined) {
         this.schema = schema;
         this.uri = uri;
+        this.logger.level = 'debug';
     }
 
     public async generateDataInDB(dbConnector: DatabaseConnector | undefined, shouldResetDataBeforeInsert: boolean = false) {
@@ -35,7 +34,7 @@ export class DataGeneratorClass {
         try {
             await this.runScripts();
         } catch (ex) {
-            logger.error('An error occured while running scripts:', (ex as Error).message);
+            this.logger.error('An error occured while running scripts:', (ex as Error).message);
             return;
         }
 
@@ -50,7 +49,7 @@ export class DataGeneratorClass {
     @KeyPress('n', Modifiers.NONE, 'Skip the current table. Only works during data generation phase.')
     skipTable() {
         if (!this.filler) return;
-        logger.info('Skipping...');
+        this.logger.info('Skipping...');
         this.filler.gotoNextTable();
     }
 
@@ -62,7 +61,7 @@ export class DataGeneratorClass {
         try {
             return JSONC.parse(fs.readFileSync(path.join('settings', `${this.schema}_custom.jsonc`)).toString());
         } catch (ex) {
-            logger.warn(`Unable to read ./settings/${this.schema}_custom.json, this will not take any customization into account.`);
+            this.logger.warn(`Unable to read ./settings/${this.schema}_custom.json, this will not take any customization into account.`);
         }
         return new CustomSchema();
     }
@@ -71,7 +70,6 @@ export class DataGeneratorClass {
         const scriptsFolder = path.join('settings', 'scripts');
         if (!fs.existsSync(scriptsFolder)) {
             fs.mkdirSync(scriptsFolder);
-            logger.info('No scripts provided.');
             return [];
         }
         return fs.readdirSync(scriptsFolder);
@@ -80,14 +78,14 @@ export class DataGeneratorClass {
     private async runScripts(scriptsExtension = '.sql') {
         const scripts = DataGeneratorClass.getCustomSqlScripts();
         if (scripts.length === 0) {
-            logger.info('No scripts provided.');
+            this.logger.info('No scripts provided.');
             return false;
         }
 
         const parsedUri = parse(this.uri!);
         for (const script of scripts) {
             if (!script.endsWith(scriptsExtension)) continue;
-            logger.info(`Running script: ${script}`);
+            this.logger.info(`Running script: ${script}`);
             execSync(`mysql -h ${parsedUri.host!} --port=${parsedUri.port!.toString()} --protocol=tcp --default-character-set=utf8 -c -u ${parsedUri.userinfo!.split(':')[0]} -p"${parsedUri.userinfo!.split(':')[1]}" ${parsedUri.path?.replace('/', '')} < "${script}"`, {
                 cwd: path.join('settings', 'scripts'),
                 stdio: 'pipe',
@@ -99,7 +97,7 @@ export class DataGeneratorClass {
         let previousEvent: ProgressEvent = { currentTable: '', currentValue: 0, max: 0, state: 'DONE', step: '' };
         let currentProgress: SingleBar;
         return (event: ProgressEvent) => {
-            if (DataGeneratorClass.hasChangesDetected(previousEvent, event)) {
+            if (this.hasChangesDetected(previousEvent, event)) {
                 if (currentProgress) currentProgress.stop();
                 currentProgress = new cliProgress.SingleBar({
                     format: `${event.step + new Array(16 - event.step.length).join(' ')} | ${colors.cyan('{bar}')} | {percentage}% | {value}/{total} | {comment}`,
@@ -115,9 +113,9 @@ export class DataGeneratorClass {
         };
     }
 
-    private static hasChangesDetected(previousEvent: ProgressEvent, event: ProgressEvent) {
+    private hasChangesDetected(previousEvent: ProgressEvent, event: ProgressEvent) {
         if (previousEvent.currentTable !== event.currentTable) {
-            logger.info(colors.green(event.currentTable));
+            this.logger.info(colors.green(event.currentTable));
             return true;
         }
 
