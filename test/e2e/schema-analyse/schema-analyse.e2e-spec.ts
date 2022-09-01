@@ -28,12 +28,11 @@ describe('Schema analyse class', () => {
      describe('Engine MySql and database type maria-db', () => {
        let dbConnector: DatabaseConnector;
 
-       afterEach(() => {
+       afterEach(async () => {
          jest.clearAllMocks();
-       });
-
-       afterAll(async () => {
-         await dbConnector.destroy();
+         if (dbConnector) {
+           await dbConnector.destroy();
+         }
        });
 
        describe('When i run generation of schema without any db connector ', () => {

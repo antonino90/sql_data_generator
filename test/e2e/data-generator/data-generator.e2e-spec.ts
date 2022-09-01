@@ -3,6 +3,7 @@ import path from 'path';
 
 import { DatabaseConnector, DatabaseConnectorBuilder } from '../../../src/database/database-connector-builder';
 import { DataGeneratorClass } from '../../../src/generation/data-generator.class';
+import { MariaDBConnector } from "../../../lib/database/mariadb-connector";
 
 const loggerInstance = {
   level: jest.fn(),
@@ -31,12 +32,11 @@ describe('Data generator class', () => {
      describe('Engine MySql and database type maria-db', () => {
        let dbConnector: DatabaseConnector;
 
-       afterEach(() => {
+       afterEach(async () => {
          jest.clearAllMocks();
-       });
-
-       afterAll(async () => {
-         await dbConnector.destroy();
+         if (dbConnector) {
+           await dbConnector.destroy();
+         }
        });
 
        describe('When i run generation of schema without any db connector ', () => {
@@ -48,8 +48,8 @@ describe('Data generator class', () => {
          expect(loggerInstance.warn).toHaveBeenCalledTimes(0)
          expect(loggerInstance.info).toHaveBeenCalledTimes(0);
        });
-       describe('When i run generation of data in DB without reset of existing data', () => {
-         it('it should todo todo todo todo', async () => {
+       describe('When i run generation of data in DB WITHOUT reset of existing data', () => {
+         it('it should generate data in database related to schema json', async () => {
            // given
            const uriScheme = 'mysql';
            const dbSchema = 'maria-db';
@@ -84,8 +84,8 @@ describe('Data generator class', () => {
            expectedWarnLog.forEach((value, index) => expect(loggerInstance.warn).toHaveBeenNthCalledWith(index+1, value));
          });
        });
-       describe('When i run generation of data in DB with reset of existing data', () => {
-         it('it should todo todo todo todo', async () => {
+       describe('When i run generation of data in DB WITH reset of existing data', () => {
+         it('it should replace existing data with new generated data related to schema json', async () => {
            // given
            const uriScheme = 'mysql';
            const dbSchema = 'maria-db';
