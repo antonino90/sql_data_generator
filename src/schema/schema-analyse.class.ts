@@ -1,20 +1,18 @@
 import * as fs from 'fs-extra';
 import { getLogger } from 'log4js';
 import * as path from 'path';
-import 'reflect-metadata';
 
 import { DatabaseConnector } from '../database/database-connector-builder';
 import { CustomSchema } from './custom-schema.class';
 import { Schema } from './schema.validator';
 
-const logger = getLogger();
-logger.level = 'debug';
-
 export class SchemaAnalyseClass {
     private readonly schema: string;
+    private logger = getLogger();
 
     constructor(schema: string = 'schema') {
         this.schema = schema;
+        this.logger.level = 'debug';
     }
 
     public async generateSchemaFromDB(dbConnector: DatabaseConnector | undefined): Promise<Schema> {

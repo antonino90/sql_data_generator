@@ -29,13 +29,15 @@ CREATE TABLE test_types (
     `enum` enum('value1', 'value2', 'value3'),
     `set` set('value1', 'value2', 'value3'),
     `binary` binary,
-    `varbinary` varbinary(1024),
-    `point` point,
-    `linestring` linestring,
-    `polygon` polygon,
-    `geometry` geometry,
-    `multipoint` multipoint,
-    `multilinestring` multilinestring,
-    `multipolygon` multipolygon,
-    `geometrycollection` geometrycollection
+    `varbinary` varbinary(1024)
 );
+
+# not implemented colum type
+# `point` point,
+# `linestring` linestring,
+#   `polygon` polygon,
+#   `geometry` geometry,
+#   `multipoint` multipoint,
+#   `multilinestring` multilinestring,
+#   `multipolygon` multipolygon,
+#   `geometrycollection` geometrycollection

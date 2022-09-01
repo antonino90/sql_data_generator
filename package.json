@@ -65,7 +65,8 @@
         "dev": "nodemon --no-stdin",
         "build": "tsc",
         "prepublishOnly": "npm run build && npm run test",
-        "test": "jest",
+        "test:unit": "NODE_ENV=test jest --testPathIgnorePatterns e2e --testTimeout=20000",
+        "test:e2e": "NODE_ENV=test jest --config ./jest-e2e.json --runInBand --testTimeout=20000",
         "lint": "tslint -p tsconfig.json -c tslint.json"
     },
     "description": "This is a tool to easily fill a SQL database.  \r It is able to analyse a schema and generate a `schema.json` which will be used to generate accurate data. It does its best to handle foreign keys.  \r You can provide a `custom_schema.json` to customize `schema.json` during the analyse phase. This will allow you to override datatype for a column, force the use of a foreign key\r or specify a list of values.",
