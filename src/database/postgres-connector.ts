@@ -210,12 +210,16 @@ export class PostgresConnector implements DatabaseConnector {
         }
     };
 
+    private extractTriggers = async (tables: string[]) => {
+        return this.dbConnection
+          .select()
+          .from('information_schema.triggers')
+          .where('event_object_schema', this.database)
+          .whereIn(`event_object_table`, tables);
+    }
+
     public async backupTriggers(tables: string[]): Promise<void> {
-        const triggers = await this.dbConnection
-            .select()
-            .from('information_schema.triggers')
-            .where('event_object_schema', this.database)
-            .whereIn(`event_object_table`, tables);
+        const triggers = await this.extractTriggers(tables);
         this.triggers = this.triggers.concat(triggers);
         fs.writeJSONSync(this.triggerBackupFile, this.triggers);
     }

@@ -16,7 +16,7 @@ jest.mock('log4js', () => ({
   getLogger: jest.fn().mockImplementation((value) => (loggerInstance)),
 }));
 
-const mockFolder = './test/e2e/schema-analyse/mocks';
+const mockFolder = './test/e2e/mocks';
 
 describe('Schema analyse class', () => {
    describe(`generateSchemaFromDB`, () => {
