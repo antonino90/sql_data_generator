@@ -1,0 +1,260 @@
+{
+    "tables": [
+        {
+            "name": "test_types",
+            "columns": [
+                {
+                    "name": "uuid",
+                    "generator": "uuid",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "smallint",
+                    "generator": "integer",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -32768,
+                    "max": 32767,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "int",
+                    "generator": "integer",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "integer",
+                    "generator": "integer",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "bigint",
+                    "generator": "integer",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -9007199254740992,
+                    "max": 9007199254740992,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "bigserial",
+                    "generator": "integer",
+                    "nullable": 0,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -9007199254740992,
+                    "max": 9007199254740992,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "real",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "double",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "float",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "float8",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "decimal",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "numeric",
+                    "generator": "real",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": -2147483648,
+                    "max": 2147483647,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "char",
+                    "generator": "string",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 1,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "varchar",
+                    "generator": "string",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "date",
+                    "generator": "date",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE",
+                    "minDate": "01-01-1970"
+                },
+                {
+                    "name": "time",
+                    "generator": "time",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "timestamp",
+                    "generator": "date",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE",
+                    "minDate": "01-01-1970"
+                },
+                {
+                    "name": "timestamp_with_time_zone",
+                    "generator": "date",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE",
+                    "minDate": "01-01-1970"
+                },
+                {
+                    "name": "timestamp_without_time_zone",
+                    "generator": "date",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE",
+                    "minDate": "01-01-1970"
+                },
+                {
+                    "name": "character",
+                    "generator": "string",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 1,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "character_varying",
+                    "generator": "string",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "text",
+                    "generator": "string",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 255,
+                    "monotonic": "NONE"
+                },
+                {
+                    "name": "enum",
+                    "generator": "values",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 3,
+                    "monotonic": "NONE",
+                    "values": [
+                        "value1",
+                        "value2",
+                        "value3"
+                    ]
+                },
+                {
+                    "name": "array_column",
+                    "generator": "array",
+                    "nullable": 0.1,
+                    "unique": false,
+                    "autoIncrement": false,
+                    "min": 0,
+                    "max": 5,
+                    "monotonic": "NONE",
+                    "arrayElementType": "text"
+                }
+            ],
+            "referencedTables": []
+        }
+    ]
+}

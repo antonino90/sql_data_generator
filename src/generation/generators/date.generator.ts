@@ -36,9 +36,10 @@ export class DateGenerator extends AbstractGenerator<Date> {
     }
 
     generate(rowIndex: number, row: { [key: string]: any; }): Date {
-        let result: Date;
-        if (this.values[rowIndex]) result = this.values[rowIndex];
-        else result = this.generateRandomDate();
-        return result;
+        if (this.values[rowIndex]) {
+            return this.values[rowIndex]
+        }
+
+        return this.generateRandomDate();
     }
 }

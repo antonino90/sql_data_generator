@@ -74,10 +74,8 @@ export class PostgresConnector implements DatabaseConnector {
 
     async insert(table: string, rows: any[]): Promise<number> {
         if (rows.length === 0) return 0;
-        const insertResult = await this.dbConnection.raw(
-          `? ON CONFLICT DO NOTHING;`,
-          [this.dbConnection(table).insert(rows)],
-        );
+        const query = this.dbConnection(table).insert(rows).toQuery();
+        const insertResult = await this.dbConnection.raw(`${query} ON CONFLICT DO NOTHING;`);
         await this.dbConnection.raw('COMMIT;');
         return Number(insertResult.rowCount);
     }
@@ -128,35 +126,34 @@ export class PostgresConnector implements DatabaseConnector {
                     column.min = -32768;
                     column.max = 32767;
                     break;
-                case 'mediumint':
-                    column.generator = Generators.integer;
-                    column.min = -8388608;
-                    column.max = 8388607;
-                    break;
-                case 'tinyint':
-                    column.generator = Generators.integer;
-                    column.min = -128;
-                    column.max = 127;
-                    break;
                 case 'int':
                 case 'integer':
-                case 'bigint':
-                case 'bigserial':
                     column.generator = Generators.integer;
                     column.min = -2147483648;
                     column.max = 2147483647;
                     break;
+                case 'bigint':
+                    column.generator = Generators.integer;
+                    column.min = -9007199254740992; // can be -9223372036854775808 but limited by external lib random-js
+                    column.max = 9007199254740992; // can be 9223372036854775807 but limited by external lib random-js
+                    break;
+                case 'bigserial':
+                    // todo prendre en compte bigserial (custom column type)
+                    column.generator = Generators.integer;
+                    column.min = 1;
+                    column.max = 9007199254740992; // can be 9223372036854775807 but limited by external lib random-js
+                    break;
                 case 'numeric':
                 case 'decimal':
+                case 'float':
                 case 'float8':
                 case 'double precision':
-                case 'double':
+                case 'real':
                     column.generator = Generators.real;
                     column.min = -2147483648;
                     column.max = 2147483647;
                     break;
                 case 'date':
-                case 'datetime':
                 case 'timestamp with time zone':
                 case 'timestamp without time zone':
                     column.generator = Generators.date;
@@ -177,9 +174,9 @@ export class PostgresConnector implements DatabaseConnector {
                     column.generator = Generators.string;
                     break;
                 case 'bit':
-                case 'bit varying':
-                    column.generator = Generators.bit;
-                    column.max = postgresqlColumn.numeric_precision;
+                    // todo prendre en compte le type de column "bit" https://www.postgresql.org/docs/current/datatype-bit.html
+                    // column.generator = Generators.bit;
+                    // column.max = 1;
                     break;
                 case 'array':
                     column.generator = Generators.array;

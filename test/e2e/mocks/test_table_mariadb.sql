@@ -35,9 +35,9 @@ CREATE TABLE test_types (
 # not implemented colum type
 # `point` point,
 # `linestring` linestring,
-#   `polygon` polygon,
-#   `geometry` geometry,
-#   `multipoint` multipoint,
-#   `multilinestring` multilinestring,
-#   `multipolygon` multipolygon,
-#   `geometrycollection` geometrycollection
+# `polygon` polygon,
+# `geometry` geometry,
+# `multipoint` multipoint,
+# `multilinestring` multilinestring,
+# `multipolygon` multipolygon,
+# `geometrycollection` geometrycollection
