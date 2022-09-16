@@ -1,8 +1,8 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { BooleanGenerator } from '../../../src/generation/generators/boolean.generator';
-import { Generators } from '../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
-import { Builder } from '../../../src/builder';
+import { BooleanGenerator } from '../../../../src/generation/generators/boolean.generator';
+import { Generators } from '../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../src/builder';
 
 const random = new Random(MersenneTwister19937.seed(42));
 describe('BooleanGenerator', () => {

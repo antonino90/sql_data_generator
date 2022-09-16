@@ -1,8 +1,8 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { Generators } from '../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
-import { Builder } from '../../../src/builder';
-import { BitGenerator } from '../../../src/generation/generators/bit.generator';
+import { Generators } from '../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../src/builder';
+import { BitGenerator } from '../../../../src/generation/generators/bit.generator';
 
 const random = new Random(MersenneTwister19937.seed(42));
 describe('BitGenerator', () => {

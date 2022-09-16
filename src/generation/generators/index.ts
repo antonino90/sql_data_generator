@@ -11,7 +11,7 @@ import { AbstractGenerator, Generators } from './generators';
 import { IntegerGenerator } from './integer.generator';
 import { RealGenerator } from './real.generator';
 import { StringGenerator } from './string.generator';
-import { TimeGenerator } from './time.generator';
+import { TimeGenerator } from './mariadb/time.generator';
 import { ValuesGenerator } from './values.generator';
 import { UuidGenerator } from './uuid.generator';
 import { ArrayGenerator } from './array.generator';

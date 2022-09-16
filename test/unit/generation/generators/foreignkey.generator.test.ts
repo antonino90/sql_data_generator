@@ -1,9 +1,9 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { ForeignKeyGenerator } from '../../../src/generation/generators/foreignkey.generator';
-import { Generators } from '../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
-import { Builder } from '../../../src/builder';
-import { TestConnector } from '../../test-connector';
+import { ForeignKeyGenerator } from '../../../../src/generation/generators/foreignkey.generator';
+import { Generators } from '../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../src/builder';
+import { TestConnector } from '../../../test-connector';
 
 const random = new Random(MersenneTwister19937.seed(42));
 describe('ForeignKeyGenerator', () => {

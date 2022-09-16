@@ -1,8 +1,8 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { TimeGenerator } from '../../../src/generation/generators/time.generator';
-import { Generators } from '../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
-import { Builder } from '../../../src/builder';
+import { TimeGenerator } from '../../../../../src/generation/generators/postgresql/time.generator';
+import { Generators } from '../../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../../src/builder';
 
 const random = new Random(MersenneTwister19937.seed(42));
 describe('TimeGenerator', () => {
@@ -19,6 +19,6 @@ describe('TimeGenerator', () => {
         const row = {};
 
         const generator = new TimeGenerator(random, table, column);
-        expect(generator.generate(0, row)).toBe('-391:47:16');
+        expect(generator.generate(0, row)).toBe('6:47:16');
     });
 });

@@ -1,8 +1,8 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { FunctionGenerator } from '../../../src/generation/generators/function.generator';
-import { Generators } from '../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../src/schema/customized-schema.class';
-import { Builder } from '../../../src/builder';
+import { FunctionGenerator } from '../../../../src/generation/generators/function.generator';
+import { Generators } from '../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../src/builder';
 
 const random = new Random(MersenneTwister19937.seed(42));
 describe('FunctionGenerator', () => {

@@ -1,9 +1,9 @@
-import { Builder } from '../../src/builder';
-import { Filler } from '../../src/generation/filler';
-import { Generators } from '../../src/generation/generators/generators';
-import { CustomSettings } from '../../src/schema/custom-schema.class';
-import { CustomizedColumn, CustomizedSchema, CustomizedTable } from '../../src/schema/customized-schema.class';
-import { TestConnector } from '../test-connector';
+import { Builder } from '../../../src/builder';
+import { Filler } from '../../../src/generation/filler';
+import { Generators } from '../../../src/generation/generators/generators';
+import { CustomSettings } from '../../../src/schema/custom-schema.class';
+import { CustomizedColumn, CustomizedSchema, CustomizedTable } from '../../../src/schema/customized-schema.class';
+import { TestConnector } from '../../test-connector';
 
 let testConnector: TestConnector;
 describe('Generator', () => {
