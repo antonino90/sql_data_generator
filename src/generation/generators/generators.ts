@@ -11,6 +11,7 @@ export enum Generators {
     time = 'time',
     string = 'string',
     uuid = 'uuid',
+    interval = 'interval',
     values = 'values',
     array = 'array',
     foreignKey = 'foreignKey',

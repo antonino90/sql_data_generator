@@ -11,7 +11,8 @@ import { RealGenerator } from './generators/real.generator';
 import { StringGenerator } from './generators/string.generator';
 import { TimeGenerator } from './generators/time.generator';
 import { ValuesGenerator } from './generators/values.generator';
-import { ArrayGenerator } from './generators/array.generator';
+import { ArrayGenerator } from './generators/postgresql/array.generator';
+import { IntervalGenerator } from './generators/postgresql/interval.generator';
 
 export class GeneratorValidation {
     static validate(table: CustomizedTable, column: CustomizedColumn): boolean {
@@ -24,6 +25,9 @@ export class GeneratorValidation {
                 break;
             case Generators.integer:
                 IntegerGenerator.validate(table, column);
+                break;
+            case Generators.interval:
+                IntervalGenerator.validate(table, column);
                 break;
             case Generators.real:
                 RealGenerator.validate(table, column);

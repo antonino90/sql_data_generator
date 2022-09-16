@@ -1,4 +1,4 @@
-import { AbstractGenerator } from './generators';
+import { AbstractGenerator } from '../generators';
 
 export class UuidGenerator extends AbstractGenerator<string> {
     validate() {

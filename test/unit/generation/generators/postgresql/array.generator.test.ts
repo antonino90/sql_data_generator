@@ -1,8 +1,8 @@
 import { MersenneTwister19937, Random } from 'random-js';
-import { Generators } from '../../../../src/generation/generators/generators';
-import { CustomizedTable, CustomizedColumn } from '../../../../src/schema/customized-schema.class';
-import { Builder } from '../../../../src/builder';
-import { ArrayGenerator } from '../../../../src/generation/generators/array.generator';
+import { Generators } from '../../../../../src/generation/generators/generators';
+import { CustomizedTable, CustomizedColumn } from '../../../../../src/schema/customized-schema.class';
+import { Builder } from '../../../../../src/builder';
+import { ArrayGenerator } from '../../../../../src/generation/generators/postgresql/array.generator';
 
 describe('ArrayGenerator', () => {
     let random: Random;

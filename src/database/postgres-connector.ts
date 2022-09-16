@@ -162,8 +162,10 @@ export class PostgresConnector implements DatabaseConnector {
                     break;
                 case 'time with time zone':
                 case 'time without time zone':
-                case 'interval':
                     column.generator = Generators.time;
+                    break;
+                case 'interval':
+                    column.generator = Generators.interval;
                     break;
                 case 'uuid':
                     column.generator = Generators.uuid;

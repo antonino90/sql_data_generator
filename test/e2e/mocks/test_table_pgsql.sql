@@ -17,6 +17,7 @@ CREATE TABLE test_types (
         varchar varchar(255),
         date date,
         time time,
+        interval interval,
         timestamp timestamp,
         timestamp_with_time_zone timestamp with time zone,
         timestamp_without_time_zone timestamp without time zone,

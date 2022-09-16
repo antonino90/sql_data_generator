@@ -13,10 +13,11 @@ import { IntegerGenerator } from './generators/integer.generator';
 import { RealGenerator } from './generators/real.generator';
 import { StringGenerator } from './generators/string.generator';
 import { ValuesGenerator } from './generators/values.generator';
-import { UuidGenerator } from './generators/uuid.generator';
-import { ArrayGenerator } from './generators/array.generator';
+import { UuidGenerator } from './generators/postgresql/uuid.generator';
+import { ArrayGenerator } from './generators/postgresql/array.generator';
 import { PostgresConnector } from '../database/postgres-connector';
 import { TimeGenerator } from './generators/time.generator';
+import { IntervalGenerator } from './generators/postgresql/interval.generator';
 import { TimeGenerator as psql_TimeGenerator } from './generators/postgresql/time.generator';
 
 export class GeneratorBuilder {
@@ -49,8 +50,16 @@ export class GeneratorBuilder {
                 return new TimeGenerator(this.random, this.table, column);
             case Generators.string:
                 return new StringGenerator(this.random, this.table, column);
+            case Generators.interval:
+                if (this.dbConnector instanceof PostgresConnector) {
+                    return new IntervalGenerator(this.random, this.table, column);
+                }
+                break;
             case Generators.uuid:
-                return new UuidGenerator(this.random, this.table, column);
+                if (this.dbConnector instanceof PostgresConnector) {
+                    return new UuidGenerator(this.random, this.table, column);
+                }
+                break;
             case Generators.values:
                 return new ValuesGenerator(this.random, this.table, column);
             case Generators.foreignKey:
@@ -62,7 +71,10 @@ export class GeneratorBuilder {
             case Generators.faker:
                 return new FakerGenerator(this.random, this.table, column);
             case Generators.array:
-                return new ArrayGenerator(this.random, this.table, column);
+                if (this.dbConnector instanceof PostgresConnector) {
+                    return new ArrayGenerator(this.random, this.table, column);
+                }
+                break;
             case Generators.none:
             default:
         }

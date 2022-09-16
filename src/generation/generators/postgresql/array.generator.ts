@@ -1,4 +1,4 @@
-import { AbstractGenerator } from './generators';
+import { AbstractGenerator } from '../generators';
 
 export class ArrayGenerator extends AbstractGenerator<string | number | null> {
     validate() {
