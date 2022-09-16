@@ -3,7 +3,6 @@ import Knex from 'knex';
 import { getLogger } from 'log4js';
 import { PoolClient } from 'pg';
 import * as path from 'path';
-import { SMALLEST_UNSAFE_INTEGER } from 'random-js/dist/utils/constants';
 
 import { Generators } from '../generation/generators/generators';
 import { PostgresColumn, Schema, Table } from '../schema/schema.validator';
@@ -135,14 +134,14 @@ export class PostgresConnector implements DatabaseConnector {
                     break;
                 case 'bigint':
                     column.generator = Generators.integer;
-                    column.min = -SMALLEST_UNSAFE_INTEGER;
-                    column.max = SMALLEST_UNSAFE_INTEGER;
+                    column.min = -9007199254740992; // can be -9223372036854775808 but limited by external lib random-js
+                    column.max = 9007199254740992; // can be 9223372036854775807 but limited by external lib random-js
                     break;
                 case 'bigserial':
                     // todo prendre en compte bigserial (custom column type)
                     column.generator = Generators.integer;
                     column.min = 1;
-                    column.max = SMALLEST_UNSAFE_INTEGER;
+                    column.max = 9007199254740992; // can be 9223372036854775807 but limited by external lib random-js
                     break;
                 case 'numeric':
                 case 'decimal':

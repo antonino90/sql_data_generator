@@ -1,8 +1,8 @@
 import { Builder } from '../builder';
-import { GeneratorBuilder } from '../generation/generators';
 import { Generators } from '../generation/generators/generators';
 import { CustomSchema } from './custom-schema.class';
-import { MariaDbColumn, ForeignKey, Schema, Table, PostgresColumn } from './schema.validator';
+import { MariaDbColumn, ForeignKey, Schema, Table } from './schema.validator';
+import { GeneratorValidation } from '../generation/generator.validation';
 
 export class CustomizedSchema extends CustomSchema {
     public tables: CustomizedTable[] = [];
@@ -21,8 +21,7 @@ export class CustomizedSchema extends CustomSchema {
             });
 
         const customizedTables: CustomizedTable[] = tables.map((table) => {
-            const customizedTable = this.customizeTable(table, customSchema);
-            return customizedTable;
+            return this.customizeTable(table, customSchema);
         });
 
         customizedSchema.tables = this.orderTablesByForeignKeys(customizedTables);
@@ -99,7 +98,9 @@ export class CustomizedSchema extends CustomSchema {
             }
 
             const customizedColumn = customizedColumnBuilder.build();
-            GeneratorBuilder.validate(customizedTable, customizedColumn);
+
+            GeneratorValidation.validate(customizedTable, customizedColumn);
+
             return customizedColumn;
         }).sort((c1, c2) => {
             if (!customTable) return 0;
