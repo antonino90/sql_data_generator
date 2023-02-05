@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import Knex from 'knex';
+import Knex, { Knex as KnexInterface } from 'knex';
 import { getLogger } from 'log4js';
 import { Connection, MysqlError } from 'mysql';
 import * as path from 'path';
@@ -8,7 +8,7 @@ import { MariaDbColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class MariaDBConnector implements DatabaseConnector {
-    private dbConnection: Knex;
+    private dbConnection: KnexInterface;
     private triggers: MySqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
@@ -225,6 +225,7 @@ export class MariaDBConnector implements DatabaseConnector {
 
     private extractForeignKeys = async (table: Table) => {
         const foreignKeys = await this.getForeignKeys(table);
+
         table.referencedTables = [];
         for (const column of table.columns) {
             const match = foreignKeys.find((fk) => fk.column.toLowerCase() === column.name.toLowerCase());

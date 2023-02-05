@@ -3,7 +3,6 @@ import path from 'path';
 
 import { DatabaseConnector, DatabaseConnectorBuilder } from '../../../src/database/database-connector-builder';
 import { DataGeneratorClass } from '../../../src/generation/data-generator.class';
-import { MariaDBConnector } from "../../../lib/database/mariadb-connector";
 
 const loggerInstance = {
   level: jest.fn(),

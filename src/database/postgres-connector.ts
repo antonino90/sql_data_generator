@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import Knex from 'knex';
+import Knex, { Knex as KnexInterface } from 'knex';
 import { getLogger } from 'log4js';
 import { PoolClient } from 'pg';
 import * as path from 'path';
@@ -9,7 +9,7 @@ import { PostgresColumn, Schema, Table } from '../schema/schema.validator';
 import { DatabaseConnector } from './database-connector-builder';
 
 export class PostgresConnector implements DatabaseConnector {
-    private dbConnection: Knex;
+    private dbConnection: KnexInterface;
     private triggers: PostgreSqlTrigger[] = [];
     private logger = getLogger();
     private triggerBackupFile: string = path.join('settings', 'triggers.json');
@@ -19,8 +19,7 @@ export class PostgresConnector implements DatabaseConnector {
         private database: string,
     ) {
         this.dbConnection = Knex({
-            client: 'pg',
-            // wrapIdentifier: (value, origImpl, queryContext) => value, to remove the quotes
+            client: 'postgres',
             connection: this.uri,
             log: {
                 warn: (message) => {
@@ -431,11 +430,28 @@ export class PostgresConnector implements DatabaseConnector {
     }
 
     async getForeignKeys(table: Table) {
+/***
+ * SELECT k1.table_schema,
+       k1.table_name,
+       k1.column_name,
+       k2.table_schema AS referenced_table_schema,
+       k2.table_name AS referenced_table_name,
+       k2.column_name AS referenced_column_name
+FROM information_schema.key_column_usage k1
+JOIN information_schema.referential_constraints fk USING (constraint_schema, constraint_name)
+JOIN information_schema.key_column_usage k2
+  ON k2.constraint_schema = fk.unique_constraint_schema
+ AND k2.constraint_name = fk.unique_constraint_name
+ AND k2.ordinal_position = k1.position_in_unique_constraint;
+ */
+
         const subQuery = this.dbConnection
             .select([
                 'kcu2.table_name',
                 this.dbConnection.raw('MAX(kcu2.column_name) as column_name'),
                 this.dbConnection.raw('MAX(kcu2.constraint_schema) as constraint_schema'),
+                //'kcu2.column_name',
+                //'kcu2.constraint_name',
                 this.dbConnection.raw('1 AS unique_index'),
             ])
             .from('information_schema.key_column_usage AS kcu2')
@@ -447,7 +463,8 @@ export class PostgresConnector implements DatabaseConnector {
             })
             .groupBy(['kcu2.table_name', 'kcu2.constraint_name'])
             .having(this.dbConnection.raw('count(kcu2.constraint_name) < 2'))
-            .as('indexes');
+            .whereNot('kcu2.table_name', 'LIKE', 'pg_%') // todo dynamic
+            .as('indexes')
 
         return this.dbConnection.select([
             'kcu.column_name AS column',
@@ -468,6 +485,8 @@ export class PostgresConnector implements DatabaseConnector {
                 this.on('kcu.table_name', 'indexes.table_name')
                   .andOn('kcu.column_name', 'indexes.column_name')
                   .andOn('kcu.constraint_schema', 'indexes.constraint_schema');
+                  //.andOn('kcu.column_name', 'indexes.column_name')
+                  //.andOn('kcu.constraint_name', 'indexes.constraint_name');
             })
             .where('kcu.table_name', table.name)
             .whereNotNull('k2.column_name');
