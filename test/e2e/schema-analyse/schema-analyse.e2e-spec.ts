@@ -13,8 +13,15 @@ const loggerInstance = {
 }
 
 jest.mock('log4js', () => ({
-  getLogger: jest.fn().mockImplementation((value) => (loggerInstance)),
+  getLogger: jest.fn().mockImplementation(() => (loggerInstance)),
 }));
+
+const { 
+  TEST_E2E_MYSQL_DATABASE_NAME,
+  TEST_E2E_MYSQL_DATABASE_USER_NAME,
+  TEST_E2E_MYSQL_DATABASE_USER_PASSWORD,
+  TEST_E2E_MYSQL_DATABASE_PORT
+ } = process.env;
 
 const mockFolder = './test/e2e/mocks';
 
@@ -46,6 +53,11 @@ describe('Schema analyse class', () => {
        });
 
        describe('When i run generation of schema with db connector mariadb ', () => {
+        let dbUri: string;
+        beforeEach(() => {
+          dbUri = `mysql://${TEST_E2E_MYSQL_DATABASE_USER_NAME}:${TEST_E2E_MYSQL_DATABASE_USER_PASSWORD}@127.0.0.1:${TEST_E2E_MYSQL_DATABASE_PORT}/${TEST_E2E_MYSQL_DATABASE_NAME}`;
+        });
+
          it('it should return all tables and definitions for current database', async () => {
            // given
            const expectedWarnLog = [
@@ -65,8 +77,8 @@ describe('Schema analyse class', () => {
            const storeSchemaToDiskMock = jest.spyOn(schemaAnalyse as any, 'storeSchemaToDisk').mockImplementation(() => null);
 
            const uriScheme = 'mysql';
-           const dbSchema = 'maria-db';
-           const dbUri = 'mysql://root:maria-db@127.0.0.1:3306/maria-db';
+           const dbSchema = TEST_E2E_MYSQL_DATABASE_NAME as string;
+
            dbConnector = await (new DatabaseConnectorBuilder(dbUri, dbSchema)).build(uriScheme);
 
            // when

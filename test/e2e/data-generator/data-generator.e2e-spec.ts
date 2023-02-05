@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import path from 'path';
 
 import { DatabaseConnector, DatabaseConnectorBuilder } from '../../../src/database/database-connector-builder';
+import { DatabaseEngines } from '../../../src/database/database-engines';
 import { DataGeneratorClass } from '../../../src/generation/data-generator.class';
 
 const loggerInstance = {
@@ -13,10 +14,17 @@ const loggerInstance = {
 }
 
 jest.mock('log4js', () => ({
-  getLogger: jest.fn().mockImplementation((value) => (loggerInstance)),
+  getLogger: jest.fn().mockImplementation(() => (loggerInstance)),
 }));
 
 const mockFolder = './test/e2e/mocks';
+
+const { 
+  TEST_E2E_MYSQL_DATABASE_NAME,
+  TEST_E2E_MYSQL_DATABASE_USER_NAME,
+  TEST_E2E_MYSQL_DATABASE_USER_PASSWORD,
+  TEST_E2E_MYSQL_DATABASE_PORT
+ } = process.env;
 
 describe('Data generator class', () => {
    describe('engine MariaDB -> generateDataInDB', () => {
@@ -24,7 +32,7 @@ describe('Data generator class', () => {
      let dbUri: string;
 
      beforeEach(() => {
-       dbUri = 'mysql://root:maria-db@127.0.0.1:3306/maria-db';
+       dbUri = `mysql://${TEST_E2E_MYSQL_DATABASE_USER_NAME}:${TEST_E2E_MYSQL_DATABASE_USER_PASSWORD}@127.0.0.1:${TEST_E2E_MYSQL_DATABASE_PORT}/${TEST_E2E_MYSQL_DATABASE_NAME}`;
        dataGenerator = new DataGeneratorClass('schema', dbUri);
      });
 
@@ -51,7 +59,7 @@ describe('Data generator class', () => {
          it('it should generate data in database related to schema json', async () => {
            // given
            const uriScheme = 'mysql';
-           const dbSchema = 'maria-db';
+           const dbSchema = DatabaseEngines.MARIADB;
            dbConnector = await (new DatabaseConnectorBuilder(dbUri, dbSchema)).build(uriScheme);
 
            const expectedWarnLog = [
@@ -87,7 +95,7 @@ describe('Data generator class', () => {
          it('it should replace existing data with new generated data related to schema json', async () => {
            // given
            const uriScheme = 'mysql';
-           const dbSchema = 'maria-db';
+           const dbSchema = DatabaseEngines.MARIADB;
            dbConnector = await (new DatabaseConnectorBuilder(dbUri, dbSchema)).build(uriScheme);
 
            const expectedWarnLog = [
